@@ -11,6 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppWalletRouteImport } from './routes/app.wallet'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppMempoolRouteImport } from './routes/app.mempool'
+import { Route as AppAnalyticsRouteImport } from './routes/app.analytics'
 
 const AppRoute = AppRouteImport.update({
   id: '/app',
@@ -22,31 +27,91 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppWalletRoute = AppWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMempoolRoute = AppMempoolRouteImport.update({
+  id: '/mempool',
+  path: '/mempool',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
+  '/app/analytics': typeof AppAnalyticsRoute
+  '/app/mempool': typeof AppMempoolRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/wallet': typeof AppWalletRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app/analytics': typeof AppAnalyticsRoute
+  '/app/mempool': typeof AppMempoolRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/wallet': typeof AppWalletRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
+  '/app/analytics': typeof AppAnalyticsRoute
+  '/app/mempool': typeof AppMempoolRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/wallet': typeof AppWalletRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/app/analytics'
+    | '/app/mempool'
+    | '/app/settings'
+    | '/app/wallet'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app'
-  id: '__root__' | '/' | '/app'
+  to:
+    | '/'
+    | '/app/analytics'
+    | '/app/mempool'
+    | '/app/settings'
+    | '/app/wallet'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/app/analytics'
+    | '/app/mempool'
+    | '/app/settings'
+    | '/app/wallet'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRoute: typeof AppRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -65,13 +130,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/wallet': {
+      id: '/app/wallet'
+      path: '/wallet'
+      fullPath: '/app/wallet'
+      preLoaderRoute: typeof AppWalletRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/mempool': {
+      id: '/app/mempool'
+      path: '/mempool'
+      fullPath: '/app/mempool'
+      preLoaderRoute: typeof AppMempoolRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/analytics': {
+      id: '/app/analytics'
+      path: '/analytics'
+      fullPath: '/app/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppAnalyticsRoute: typeof AppAnalyticsRoute
+  AppMempoolRoute: typeof AppMempoolRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppWalletRoute: typeof AppWalletRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAnalyticsRoute: AppAnalyticsRoute,
+  AppMempoolRoute: AppMempoolRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppWalletRoute: AppWalletRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRoute: AppRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
