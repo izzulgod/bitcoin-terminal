@@ -1,6 +1,9 @@
-// Polyfill Buffer for browser — bitcoinjs-lib / bip32 still use it.
+// Polyfill Buffer + global for browser — bitcoinjs-lib / bip32 / bs58check need them.
 import { Buffer } from "buffer";
-if (typeof globalThis !== "undefined" && !(globalThis as { Buffer?: unknown }).Buffer) {
-  (globalThis as { Buffer: unknown }).Buffer = Buffer;
-}
+
+const g = globalThis as unknown as { Buffer?: unknown; global?: unknown; process?: unknown };
+if (!g.Buffer) g.Buffer = Buffer;
+if (!g.global) g.global = globalThis;
+if (!g.process) g.process = { env: {} };
+
 export {};
