@@ -144,7 +144,7 @@ rewrites and security headers.
    pick the repo.
 3. Vercel auto-detects:
    - Build command: `vite build`
-   - Output directory: `.output/public`
+   - Output directory: `dist/client`
 4. Click **Deploy**.
 
 ### Option 2 — CLI
@@ -166,7 +166,7 @@ vercel --prod
 
 ### Other hosts
 The project also runs on **Netlify, Cloudflare Pages, GitHub Pages**, or any
-static host — point them at `.output/public` after `vite build`.
+static host — point them at `dist/client` after `vite build`.
 
 ---
 
