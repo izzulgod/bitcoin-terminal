@@ -1,3 +1,4 @@
+import "./buffer-polyfill";
 import * as bitcoin from "bitcoinjs-lib";
 import { BIP32Factory, type BIP32Interface } from "bip32";
 import * as ecc from "@bitcoinerlab/secp256k1";
