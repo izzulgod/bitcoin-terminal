@@ -30,10 +30,9 @@ function Landing() {
 
   useEffect(() => {
     if (hydrated && wallet) {
-      navigate({ to: "/app" });
+      navigate({ to: "/app", replace: true });
     } else if (hydrated && !wallet) {
-      const t = setTimeout(() => setStep("intro"), 1400);
-      return () => clearTimeout(t);
+      setStep((current) => (current === "splash" ? "intro" : current));
     }
   }, [hydrated, wallet, navigate]);
 
@@ -60,7 +59,7 @@ function Landing() {
       pin: usePin ? pin : null,
     });
     setWallet({
-      rawXpub: xpubInput.replace(/\s+/g, "").trim(),
+      rawXpub: detected.normalizedXpub,
       normalizedXpub: detected.normalizedXpub,
       scriptType,
       derivationLabel: detected.derivationLabel,
