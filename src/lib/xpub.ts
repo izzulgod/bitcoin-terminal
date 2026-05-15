@@ -38,14 +38,47 @@ function cleanInput(input: string): string {
  * Detect script type from prefix and convert non-standard xpub variants
  * (ypub/zpub/etc.) to standard xpub bytes that bip32 can parse.
  */
+/**
+ * Parse a Bitcoin output descriptor wrapper like:
+ *   wpkh(xpub.../84'/0'/0'/*)
+ *   sh(wpkh(ypub.../...))
+ *   pkh(xpub.../...)
+ *   tr(xpub.../...)
+ * Returns { xpub, scriptHint? } extracted from inside the wrapper.
+ */
+function parseDescriptor(input: string): { xpub: string; scriptHint?: ScriptType } {
+  const s = input.trim();
+  // Match outermost function name(s)
+  const wpkh = /^wpkh\(\s*([^,)#\s]+?)(?:\/[\d'h*\/]+)?\s*\)(?:#[a-z0-9]+)?$/i;
+  const shwpkh = /^sh\(\s*wpkh\(\s*([^,)#\s]+?)(?:\/[\d'h*\/]+)?\s*\)\s*\)(?:#[a-z0-9]+)?$/i;
+  const pkh = /^pkh\(\s*([^,)#\s]+?)(?:\/[\d'h*\/]+)?\s*\)(?:#[a-z0-9]+)?$/i;
+  const tr = /^tr\(\s*([^,)#\s]+?)(?:\/[\d'h*\/]+)?\s*\)(?:#[a-z0-9]+)?$/i;
+  let m: RegExpMatchArray | null;
+  if ((m = s.match(shwpkh))) return { xpub: m[1], scriptHint: "p2sh-p2wpkh" };
+  if ((m = s.match(wpkh))) return { xpub: m[1], scriptHint: "p2wpkh" };
+  if ((m = s.match(tr))) return { xpub: m[1], scriptHint: "p2tr" };
+  if ((m = s.match(pkh))) return { xpub: m[1], scriptHint: "p2pkh" };
+  // Bare xpub possibly with derivation suffix /84'/0'/0'/* — strip it.
+  const bare = s.split("/")[0];
+  return { xpub: bare };
+}
+
 export function detectAndNormalize(rawXpub: string, scriptOverride?: ScriptType): DetectedWallet {
   const cleaned = cleanInput(rawXpub);
   if (!cleaned) throw new Error("Empty xpub");
 
-  const decoded = bs58check.decode(cleaned);
+  const { xpub: extracted, scriptHint } = parseDescriptor(cleaned);
+
+  let decoded: Uint8Array;
+  try {
+    decoded = bs58check.decode(extracted);
+  } catch {
+    throw new Error("Invalid xpub format. Paste a raw xpub/ypub/zpub or a descriptor like wpkh(xpub.../...).");
+  }
   const versionHex = Buffer.from(decoded.slice(0, 4)).toString("hex");
   const meta = VERSION_BYTES[versionHex];
   if (!meta) throw new Error(`Unsupported extended public key version: ${versionHex}`);
+
 
   // Re-encode with standard xpub/tpub version bytes so bip32 lib accepts it.
   const versionReplacement = meta.net === "mainnet" ? STANDARD_XPUB_VERSION : STANDARD_TPUB_VERSION;
@@ -54,10 +87,15 @@ export function detectAndNormalize(rawXpub: string, scriptOverride?: ScriptType)
   payload.set(decoded.slice(4), 4);
   const normalizedXpub = bs58check.encode(payload);
 
-  const scriptType = scriptOverride ?? meta.script;
+  const scriptType = scriptOverride ?? scriptHint ?? meta.script;
+  const label = scriptOverride
+    ? overrideLabel(scriptOverride)
+    : scriptHint
+      ? overrideLabel(scriptHint)
+      : meta.label;
   return {
     scriptType,
-    derivationLabel: scriptOverride ? overrideLabel(scriptOverride) : meta.label,
+    derivationLabel: label,
     network: meta.net,
     normalizedXpub,
   };
