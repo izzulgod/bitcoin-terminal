@@ -87,10 +87,15 @@ export function detectAndNormalize(rawXpub: string, scriptOverride?: ScriptType)
   payload.set(decoded.slice(4), 4);
   const normalizedXpub = bs58check.encode(payload);
 
-  const scriptType = scriptOverride ?? meta.script;
+  const scriptType = scriptOverride ?? scriptHint ?? meta.script;
+  const label = scriptOverride
+    ? overrideLabel(scriptOverride)
+    : scriptHint
+      ? overrideLabel(scriptHint)
+      : meta.label;
   return {
     scriptType,
-    derivationLabel: scriptOverride ? overrideLabel(scriptOverride) : meta.label,
+    derivationLabel: label,
     network: meta.net,
     normalizedXpub,
   };
