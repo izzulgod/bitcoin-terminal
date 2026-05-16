@@ -3,6 +3,7 @@ import * as bitcoin from "bitcoinjs-lib";
 import { BIP32Factory, type BIP32Interface } from "bip32";
 import * as ecc from "@bitcoinerlab/secp256k1";
 import bs58check from "bs58check";
+import { Buffer } from "buffer";
 
 bitcoin.initEccLib(ecc);
 const bip32 = BIP32Factory(ecc);
