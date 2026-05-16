@@ -115,11 +115,7 @@ bun run preview
 
 ### First launch
 1. Splash → tap **Import Wallet**
-2. Paste your xpub (or ypub/zpub). Example, an `xpub` from Ledger:
-   ```
-   xpub6CX16S9FXgLZDr9D8pbiVYRJxdMQKkLu19v6hQEQjxZJ4Gk9cWuHUpUAYcxa9sSf6BL8VG4ExuW8PDjdVMirxcbt6NEVspdbbxawWzbVs1n
-   ```
-   (spaces are auto-trimmed)
+2. Paste your xpub (or ypub/zpub).
 3. The app auto-detects the script type — for the Ledger key above, derivation
    `84'/0'/0'` indicates **BIP84 / Native SegWit (`bc1q…`)** — confirm or
    override.
