@@ -132,7 +132,10 @@ export async function syncWallet(
   }
 
   const utxos = utxoArrays.flat();
-  const totalBalance = utxos.reduce((s, u) => s + u.value, 0);
+  // Use address summaries as the source of truth for portfolio balance.
+  // The UTXO endpoint can be blocked/rate-limited independently, while tx/address
+  // summaries may still load; this prevents a false 0 balance when history exists.
+  const totalBalance = all.reduce((s, a) => s + a.balance, 0);
 
   const firstUnusedReceive = receive.find((a) => !a.used) ?? receive[0];
 
