@@ -18,20 +18,20 @@ export function BottomNav() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/90 backdrop-blur-xl"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="mx-auto flex max-w-2xl">
+      <ul className="mx-auto flex w-full max-w-2xl px-1">
         {items.map(({ to, label, icon: Icon }) => {
           const active = to === "/app" ? path === "/app" : path.startsWith(to);
           return (
-            <li key={to} className="flex-1">
+            <li key={to} className="min-w-0 flex-1">
               <Link
                 to={to}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 py-2.5 text-[11px] font-medium transition-colors",
+                  "flex flex-col items-center justify-center gap-1 px-1 py-2.5 text-[10px] font-medium transition-colors",
                   active ? "text-bitcoin" : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <Icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
-                <span>{label}</span>
+                <Icon className="h-5 w-5 shrink-0" strokeWidth={active ? 2.5 : 2} />
+                <span className="truncate max-w-full">{label}</span>
               </Link>
             </li>
           );
