@@ -15,6 +15,7 @@ export interface DetectedWallet {
   derivationLabel: string; // e.g. BIP84
   network: "mainnet" | "testnet";
   normalizedXpub: string; // converted to standard xpub for bip32
+  scriptLocked?: boolean; // true when an output descriptor explicitly set the script type
 }
 
 const VERSION_BYTES: Record<string, { script: ScriptType; label: string; net: "mainnet" | "testnet" }> = {
@@ -88,21 +89,20 @@ export function detectAndNormalize(rawXpub: string, scriptOverride?: ScriptType)
   payload.set(decoded.slice(4), 4);
   const normalizedXpub = bs58check.encode(payload);
 
-  const scriptType = scriptOverride ?? scriptHint ?? meta.script;
-  const label = scriptOverride
-    ? overrideLabel(scriptOverride)
-    : scriptHint
-      ? overrideLabel(scriptHint)
-      : meta.label;
+  // Descriptor wrappers (wpkh(...), sh(wpkh(...)), etc.) are authoritative.
+  // Bare xpubs are ambiguous, so the user's manual BIP selection must win there.
+  const scriptType = scriptHint ?? scriptOverride ?? meta.script;
+  const label = scriptHint || scriptOverride ? scriptTypeLabel(scriptType) : meta.label;
   return {
     scriptType,
     derivationLabel: label,
     network: meta.net,
     normalizedXpub,
+    scriptLocked: Boolean(scriptHint),
   };
 }
 
-function overrideLabel(s: ScriptType): string {
+export function scriptTypeLabel(s: ScriptType): string {
   switch (s) {
     case "p2wpkh": return "BIP84 (Native SegWit)";
     case "p2sh-p2wpkh": return "BIP49 (Nested SegWit)";
