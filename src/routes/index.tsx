@@ -31,8 +31,6 @@ function Landing() {
   useEffect(() => {
     if (hydrated && wallet) {
       navigate({ to: "/app", replace: true });
-    } else if (hydrated && !wallet) {
-      setStep((current) => (current === "splash" ? "intro" : current));
     }
   }, [hydrated, wallet, navigate]);
 
