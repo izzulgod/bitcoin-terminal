@@ -113,21 +113,21 @@ function Home() {
 
       {/* Chart */}
       <section className="mt-6 rounded-2xl border border-border bg-card p-4">
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div className="min-w-0">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">
               BTC Price
             </div>
-            <div className="font-mono text-xl font-semibold">
+            <div className="font-mono text-xl font-semibold truncate">
               {price.data ? formatFiat(priceVal, currency) : "—"}
             </div>
           </div>
-          <div className="flex gap-1 rounded-lg bg-background p-1">
+          <div className="flex gap-0.5 rounded-lg bg-background p-1 shrink-0">
             {RANGES.map((r) => (
               <button
                 key={r.label}
                 onClick={() => setRange(r)}
-                className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+                className={`rounded-md px-2 py-1 text-[11px] font-semibold transition-colors ${
                   range.label === r.label
                     ? "bg-bitcoin text-primary-foreground"
                     : "text-muted-foreground"

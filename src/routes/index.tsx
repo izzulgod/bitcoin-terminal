@@ -15,7 +15,7 @@ type Step = (typeof STEPS)[number];
 function Landing() {
   const navigate = useNavigate();
   const { hydrate, hydrated, wallet, setWallet, updateSettings } = useAppStore();
-  const [step, setStep] = useState<Step>("splash");
+  const [step, setStep] = useState<Step>("intro");
   const [xpubInput, setXpubInput] = useState("");
   const [detected, setDetected] = useState<ReturnType<typeof detectAndNormalize> | null>(null);
   const [scriptType, setScriptType] = useState<ScriptType>("p2wpkh");
@@ -31,8 +31,6 @@ function Landing() {
   useEffect(() => {
     if (hydrated && wallet) {
       navigate({ to: "/app", replace: true });
-    } else if (hydrated && !wallet) {
-      setStep((current) => (current === "splash" ? "intro" : current));
     }
   }, [hydrated, wallet, navigate]);
 
@@ -128,23 +126,23 @@ function Splash() {
 
 function Intro({ onNext }: { onNext: () => void }) {
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-12">
+    <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col px-6 py-8" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1.5rem)" }}>
       <div className="flex flex-1 flex-col items-center justify-center text-center">
-        <div className="rounded-3xl bg-bitcoin/10 p-5 mb-8 bitcoin-glow">
+        <div className="rounded-3xl bg-bitcoin/10 p-5 mb-6 bitcoin-glow">
           <Bitcoin className="h-12 w-12 text-bitcoin" />
         </div>
-        <h1 className="text-4xl font-bold leading-tight tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-bold leading-tight tracking-tight">
           Your Bitcoin.
           <br />
           <span className="text-bitcoin">Fully private.</span>
           <br />
           Fully visible.
         </h1>
-        <p className="mt-4 text-base text-muted-foreground">
+        <p className="mt-4 text-sm sm:text-base text-muted-foreground">
           A Bloomberg Terminal for personal Bitcoin. Import your xpub from Ledger, monitor your
           stack — without ever exposing a private key.
         </p>
-        <div className="mt-10 grid w-full grid-cols-3 gap-3 text-xs">
+        <div className="mt-8 grid w-full grid-cols-3 gap-3 text-xs">
           <Feature icon={Eye} label="Watch-only" />
           <Feature icon={ShieldCheck} label="No keys" />
           <Feature icon={Activity} label="Real-time" />
@@ -152,7 +150,7 @@ function Intro({ onNext }: { onNext: () => void }) {
       </div>
       <button
         onClick={onNext}
-        className="mt-10 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-bitcoin py-4 text-base font-semibold text-primary-foreground transition-all hover:opacity-95 active:scale-[0.99]"
+        className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-bitcoin py-4 text-base font-semibold text-primary-foreground transition-all hover:opacity-95 active:scale-[0.99]"
       >
         Import Wallet <ArrowRight className="h-5 w-5" />
       </button>
