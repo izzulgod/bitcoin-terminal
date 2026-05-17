@@ -113,20 +113,6 @@ bun run build
 bun run preview
 ```
 
-### First launch
-1. Splash → tap **Import Wallet**
-2. Paste your xpub (or ypub/zpub).
-3. The app auto-detects the script type — for the Ledger key above, derivation
-   `84'/0'/0'` indicates **BIP84 / Native SegWit (`bc1q…`)** — confirm or
-   override.
-4. Optionally set a 6-digit PIN.
-5. Done — terminal opens, scans, and renders.
-
-> ℹ️  Standard `xpub` prefix is BIP44 by default. Ledger Live exports `xpub`
-> for **all** account types (its API encodes the path elsewhere). If you
-> imported from Ledger and your account is Native SegWit, manually pick
-> **BIP84** in the detect screen. The app supports overriding the auto-pick.
-
 ---
 
 ## 🚢 Deploying to Vercel
