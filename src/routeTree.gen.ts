@@ -17,6 +17,7 @@ import { Route as AppWalletRouteImport } from './routes/app.wallet'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppMempoolRouteImport } from './routes/app.mempool'
 import { Route as AppAnalyticsRouteImport } from './routes/app.analytics'
+import { Route as ApiPublicMempoolRouteImport } from './routes/api/public/mempool'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -58,6 +59,11 @@ const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiPublicMempoolRoute = ApiPublicMempoolRouteImport.update({
+  id: '/api/public/mempool',
+  path: '/api/public/mempool',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/': typeof AppIndexRoute
+  '/api/public/mempool': typeof ApiPublicMempoolRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app': typeof AppIndexRoute
+  '/api/public/mempool': typeof ApiPublicMempoolRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/': typeof AppIndexRoute
+  '/api/public/mempool': typeof ApiPublicMempoolRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/wallet'
     | '/app/'
+    | '/api/public/mempool'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/wallet'
     | '/app'
+    | '/api/public/mempool'
   id:
     | '__root__'
     | '/'
@@ -119,12 +130,14 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/wallet'
     | '/app/'
+    | '/api/public/mempool'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiPublicMempoolRoute: typeof ApiPublicMempoolRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAnalyticsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/public/mempool': {
+      id: '/api/public/mempool'
+      path: '/api/public/mempool'
+      fullPath: '/api/public/mempool'
+      preLoaderRoute: typeof ApiPublicMempoolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -210,6 +230,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiPublicMempoolRoute: ApiPublicMempoolRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

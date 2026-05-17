@@ -4,7 +4,10 @@
 const BASE = "https://mempool.space/api";
 
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`);
+  const url = typeof window === "undefined"
+    ? `${BASE}${path}`
+    : `/api/public/mempool?path=${encodeURIComponent(path)}`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`mempool ${path} -> ${res.status}`);
   const ct = res.headers.get("content-type") ?? "";
   if (ct.includes("application/json")) return (await res.json()) as T;
