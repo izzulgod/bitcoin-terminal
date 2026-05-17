@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Bitcoin, ArrowRight, ShieldCheck, Eye, Activity } from "lucide-react";
 import { useAppStore } from "@/store/app";
-import { detectAndNormalize, type ScriptType } from "@/lib/xpub";
+import { detectAndNormalize, scriptTypeLabel, type ScriptType } from "@/lib/xpub";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -50,6 +50,8 @@ function Landing() {
 
   function handleConfirm() {
     if (!detected) return;
+    const finalScriptType = detected.scriptLocked ? detected.scriptType : scriptType;
+    const finalWallet = detectAndNormalize(detected.normalizedXpub, finalScriptType);
     if (usePin) {
       if (pin.length !== 6) return setError("PIN must be 6 digits");
       if (pin !== pinConfirm) return setError("PINs do not match");
@@ -59,11 +61,11 @@ function Landing() {
       pin: usePin ? pin : null,
     });
     setWallet({
-      rawXpub: detected.normalizedXpub,
-      normalizedXpub: detected.normalizedXpub,
-      scriptType,
-      derivationLabel: detected.derivationLabel,
-      network: detected.network,
+      rawXpub: finalWallet.normalizedXpub,
+      normalizedXpub: finalWallet.normalizedXpub,
+      scriptType: finalWallet.scriptType,
+      derivationLabel: scriptTypeLabel(finalWallet.scriptType),
+      network: finalWallet.network,
       label: "Ledger Wallet",
       createdAt: Date.now(),
     });
