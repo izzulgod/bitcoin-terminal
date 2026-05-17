@@ -15,7 +15,7 @@ type Step = (typeof STEPS)[number];
 function Landing() {
   const navigate = useNavigate();
   const { hydrate, hydrated, wallet, setWallet, updateSettings } = useAppStore();
-  const [step, setStep] = useState<Step>("splash");
+  const [step, setStep] = useState<Step>("intro");
   const [xpubInput, setXpubInput] = useState("");
   const [detected, setDetected] = useState<ReturnType<typeof detectAndNormalize> | null>(null);
   const [scriptType, setScriptType] = useState<ScriptType>("p2wpkh");
