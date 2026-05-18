@@ -256,11 +256,6 @@ function Analytics() {
             }
           />
         </ul>
-        <div className="mt-3 text-[10px] text-muted-foreground">
-          Cost basis is estimated using current spot price. Connect a historic price feed for
-          per-tx accuracy.
-        </div>
-        {chart.data && chart.data.length === 0 && null}
       </section>
     </div>
   );
