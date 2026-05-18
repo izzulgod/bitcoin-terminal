@@ -16,7 +16,9 @@ const ALL_TIME_HIGH_USD = 109_000; // updated reference point
 function Analytics() {
   const { data: sync } = useSync();
   const price = usePrice();
-  const chart = useMarketChart(365);
+  // "max" gives daily historical prices since 2013 — enough to price every
+  // tx, even years old. Free CoinGecko allows this.
+  const chart = useMarketChart("max");
   const currency = useAppStore((s) => s.settings.currency);
 
   const owned = useMemo(
@@ -25,28 +27,70 @@ function Analytics() {
   );
   const flows = useMemo(() => (sync ? classifyTxs(sync.txs, owned, 0) : []), [sync, owned]);
 
-  // DCA / cost basis estimate: for each incoming tx, value at tx time approximated
-  // by current price (real implementation would use historic price API).
-  const incoming = flows.filter((f) => f.direction !== "out" && f.net > 0);
-  const totalReceivedSats = incoming.reduce((s, f) => s + f.net, 0);
-  const totalBtc = satsToBtc(sync?.totalBalance ?? 0);
+  // Incoming txs (DCA buys / deposits) — sorted oldest → newest for FIFO.
+  const incoming = useMemo(
+    () =>
+      flows
+        .filter((f) => f.direction !== "out" && f.net > 0 && f.tx.status.block_time)
+        .sort((a, b) => (a.tx.status.block_time! - b.tx.status.block_time!)),
+    [flows]
+  );
+
+  // Historical USD price lookup (binary-search by timestamp ms).
+  const priceAtMs = useMemo(() => {
+    const points = chart.data ?? [];
+    return (ts: number): number | null => {
+      if (!points.length) return null;
+      let lo = 0;
+      let hi = points.length - 1;
+      while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        if (points[mid].t < ts) lo = mid + 1;
+        else hi = mid;
+      }
+      return points[lo].v;
+    };
+  }, [chart.data]);
+
   const priceVal = price.data ? (currency === "USD" ? price.data.usd : price.data.idr) : 0;
+  const usdToCurrency = price.data && price.data.usd > 0 ? priceVal / price.data.usd : 1;
+
+  // Compute cost basis in USD using historical price at each receive,
+  // then pro-rate by remaining balance / total acquired (FIFO-ish estimate).
+  const { costBasisUsd, acquiredSats, avgPriceUsd } = useMemo(() => {
+    let cb = 0;
+    let acq = 0;
+    for (const f of incoming) {
+      const ts = (f.tx.status.block_time as number) * 1000;
+      const p = priceAtMs(ts) ?? price.data?.usd ?? 0;
+      const btc = satsToBtc(f.net);
+      cb += btc * p;
+      acq += f.net;
+    }
+    const avg = acq > 0 ? cb / satsToBtc(acq) : 0;
+    return { costBasisUsd: cb, acquiredSats: acq, avgPriceUsd: avg };
+  }, [incoming, priceAtMs, price.data]);
+
+  const totalBalanceSats = sync?.totalBalance ?? 0;
+  const totalBtc = satsToBtc(totalBalanceSats);
   const portfolioValue = totalBtc * priceVal;
-  const costBasis = satsToBtc(totalReceivedSats) * priceVal; // simplified
+
+  // Pro-rata cost basis for currently held sats (handles partial spends).
+  const heldRatio = acquiredSats > 0 ? Math.min(1, totalBalanceSats / acquiredSats) : 0;
+  const adjustedCostBasisUsd = costBasisUsd * heldRatio;
+  const costBasis = adjustedCostBasisUsd * usdToCurrency;
   const pnl = portfolioValue - costBasis;
   const pnlPct = costBasis > 0 ? (pnl / costBasis) * 100 : 0;
+  const avgPriceDisplay = avgPriceUsd * usdToCurrency;
 
   const athDistance = price.data
     ? ((price.data.usd - ALL_TIME_HIGH_USD) / ALL_TIME_HIGH_USD) * 100
     : 0;
 
-  // Build accumulation timeline from incoming txs
+  // Build accumulation timeline from incoming txs (already sorted ascending).
   const timeline = useMemo(() => {
-    const sorted = [...incoming]
-      .filter((f) => f.tx.status.block_time)
-      .sort((a, b) => (a.tx.status.block_time! - b.tx.status.block_time!));
     let acc = 0;
-    return sorted.map((f) => {
+    return incoming.map((f) => {
       acc += f.net;
       return {
         t: (f.tx.status.block_time as number) * 1000,
@@ -55,7 +99,8 @@ function Analytics() {
     });
   }, [incoming]);
 
-  const firstReceive = incoming[incoming.length - 1]; // earliest because sorted desc
+  const firstReceive = incoming[0];
+  const totalReceivedSats = acquiredSats;
 
   return (
     <div className="px-5 pt-6">
