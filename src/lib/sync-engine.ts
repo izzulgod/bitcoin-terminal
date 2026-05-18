@@ -8,6 +8,7 @@ import {
 } from "./xpub";
 import { mempoolApi, type AddressInfo, type Tx, type UTXO } from "./mempool";
 import type { StoredWallet } from "./wallet-store";
+import { saveSyncCache } from "./sync-cache";
 
 const GAP_LIMIT = 20;
 const BATCH = 5;
@@ -139,7 +140,7 @@ export async function syncWallet(
 
   const firstUnusedReceive = receive.find((a) => !a.used) ?? receive[0];
 
-  return {
+  const result: SyncResult = {
     wallet,
     addresses: all,
     utxos,
@@ -147,6 +148,8 @@ export async function syncWallet(
     totalBalance,
     receiveAddress: firstUnusedReceive.derived.address,
   };
+  saveSyncCache(stored.normalizedXpub, stored.scriptType, result);
+  return result;
 }
 
 export interface TxFlow {
