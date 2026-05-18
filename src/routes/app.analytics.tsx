@@ -128,15 +128,31 @@ function Analytics() {
             {pnlPct.toFixed(2)}%
           </div>
         </div>
-        <div className="mt-2 grid grid-cols-2 gap-3 text-xs">
+        <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
           <div>
-            <div className="text-muted-foreground">Cost basis (est.)</div>
+            <div className="text-muted-foreground">Cost basis</div>
             <div className="font-mono">{formatFiat(costBasis, currency)}</div>
           </div>
           <div>
             <div className="text-muted-foreground">Current value</div>
             <div className="font-mono">{formatFiat(portfolioValue, currency)}</div>
           </div>
+          <div>
+            <div className="text-muted-foreground">Avg buy price</div>
+            <div className="font-mono">
+              {avgPriceDisplay > 0 ? formatFiat(avgPriceDisplay, currency) : "—"}
+            </div>
+          </div>
+          <div>
+            <div className="text-muted-foreground">Current price</div>
+            <div className="font-mono">
+              {priceVal > 0 ? formatFiat(priceVal, currency) : "—"}
+            </div>
+          </div>
+        </div>
+        <div className="mt-3 text-[10px] text-muted-foreground">
+          Cost basis priced per-tx using historical BTC/USD at each receive's block time,
+          converted to {currency} at the current FX rate. Pro-rated for spent sats.
         </div>
       </section>
 
