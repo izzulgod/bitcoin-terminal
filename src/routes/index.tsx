@@ -9,7 +9,7 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const STEPS = ["splash", "intro", "import", "detect", "security", "syncing"] as const;
+const STEPS = ["intro", "import", "detect", "security"] as const;
 type Step = (typeof STEPS)[number];
 
 function Landing() {
@@ -67,16 +67,14 @@ function Landing() {
       label: "Ledger Wallet",
       createdAt: Date.now(),
     });
-    setStep("syncing");
-    setTimeout(() => navigate({ to: "/app" }), 800);
     toast.success("Wallet imported");
+    navigate({ to: "/app", replace: true });
   }
 
-  if (!hydrated) return <Splash />;
+  if (!hydrated) return null;
 
   return (
     <main className="min-h-screen overflow-hidden">
-      {step === "splash" && <Splash />}
       {step === "intro" && <Intro onNext={() => setStep("import")} />}
       {step === "import" && (
         <ImportScreen
@@ -107,20 +105,7 @@ function Landing() {
           onConfirm={handleConfirm}
         />
       )}
-      {step === "syncing" && <Syncing />}
     </main>
-  );
-}
-
-function Splash() {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background">
-      <div className="rounded-3xl bg-bitcoin/10 p-6 bitcoin-glow animate-pulse">
-        <Bitcoin className="h-16 w-16 text-bitcoin" />
-      </div>
-      <h1 className="mt-6 text-2xl font-bold tracking-tight">Bitcoin Terminal</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Watch-only · xpub powered</p>
-    </div>
   );
 }
 
@@ -358,11 +343,4 @@ function SecurityScreen({
   );
 }
 
-function Syncing() {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6">
-      <Bitcoin className="h-12 w-12 animate-spin text-bitcoin" />
-      <p className="mt-4 text-sm text-muted-foreground">Scanning blockchain…</p>
-    </div>
-  );
-}
+

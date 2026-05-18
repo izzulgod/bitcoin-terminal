@@ -116,7 +116,7 @@ export interface MarketChartPoint {
   t: number;
   v: number;
 }
-export async function fetchMarketChart(days: number): Promise<MarketChartPoint[]> {
+export async function fetchMarketChart(days: number | "max"): Promise<MarketChartPoint[]> {
   const res = await fetch(
     `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`
   );
