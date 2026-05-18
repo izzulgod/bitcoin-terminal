@@ -9,7 +9,7 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const STEPS = ["splash", "intro", "import", "detect", "security", "syncing"] as const;
+const STEPS = ["intro", "import", "detect", "security"] as const;
 type Step = (typeof STEPS)[number];
 
 function Landing() {
@@ -67,16 +67,14 @@ function Landing() {
       label: "Ledger Wallet",
       createdAt: Date.now(),
     });
-    setStep("syncing");
-    setTimeout(() => navigate({ to: "/app" }), 800);
     toast.success("Wallet imported");
+    navigate({ to: "/app", replace: true });
   }
 
-  if (!hydrated) return <Splash />;
+  if (!hydrated) return null;
 
   return (
     <main className="min-h-screen overflow-hidden">
-      {step === "splash" && <Splash />}
       {step === "intro" && <Intro onNext={() => setStep("import")} />}
       {step === "import" && (
         <ImportScreen
