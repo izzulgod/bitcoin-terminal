@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAppStore } from "@/store/app";
 import { syncWallet, type SyncResult } from "@/lib/sync-engine";
+import { loadSyncCache } from "@/lib/sync-cache";
 import {
   fetchPrice,
   fetchMarketChart,
@@ -14,12 +15,15 @@ import {
 
 export function useSync() {
   const wallet = useAppStore((s) => s.wallet);
+  const cached = wallet ? loadSyncCache(wallet.normalizedXpub, wallet.scriptType) : null;
   return useQuery<SyncResult>({
     queryKey: ["sync", wallet?.normalizedXpub, wallet?.scriptType],
     queryFn: () => syncWallet(wallet!),
     enabled: !!wallet,
     staleTime: 60_000,
     refetchOnWindowFocus: false,
+    initialData: cached?.result,
+    initialDataUpdatedAt: cached?.savedAt,
   });
 }
 
@@ -32,7 +36,7 @@ export function usePrice() {
   });
 }
 
-export function useMarketChart(days: number) {
+export function useMarketChart(days: number | "max") {
   return useQuery<MarketChartPoint[]>({
     queryKey: ["chart", days],
     queryFn: () => fetchMarketChart(days),
