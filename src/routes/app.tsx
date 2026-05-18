@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from "@tanstack/react-router";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAppStore } from "@/store/app";
 import { BottomNav } from "@/components/bottom-nav";
+import { SyncGate } from "@/components/sync-gate";
 import { Bitcoin } from "lucide-react";
 
 export const Route = createFileRoute("/app")({
@@ -25,15 +26,7 @@ function AppLayout() {
     }
   }, [hydrated, wallet, navigate]);
 
-  if (!hydrated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Bitcoin className="h-10 w-10 animate-pulse text-bitcoin" />
-      </div>
-    );
-  }
-
-  if (!wallet) return null;
+  if (!hydrated || !wallet) return null;
 
   if (settings.pinEnabled && settings.pin && !unlocked) {
     return (
@@ -71,11 +64,14 @@ function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen pb-24">
-      <div className="mx-auto max-w-2xl">
-        <Outlet />
+    <SyncGate>
+      <div className="min-h-screen pb-24">
+        <div className="mx-auto max-w-2xl">
+          <Outlet />
+        </div>
+        <BottomNav />
       </div>
-      <BottomNav />
-    </div>
+    </SyncGate>
   );
 }
+
