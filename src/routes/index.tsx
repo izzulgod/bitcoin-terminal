@@ -105,20 +105,7 @@ function Landing() {
           onConfirm={handleConfirm}
         />
       )}
-      {step === "syncing" && <Syncing />}
     </main>
-  );
-}
-
-function Splash() {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background">
-      <div className="rounded-3xl bg-bitcoin/10 p-6 bitcoin-glow animate-pulse">
-        <Bitcoin className="h-16 w-16 text-bitcoin" />
-      </div>
-      <h1 className="mt-6 text-2xl font-bold tracking-tight">Bitcoin Terminal</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Watch-only · xpub powered</p>
-    </div>
   );
 }
 
