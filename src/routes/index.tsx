@@ -343,11 +343,5 @@ function SecurityScreen({
   );
 }
 
-function Syncing() {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6">
-      <Bitcoin className="h-12 w-12 animate-spin text-bitcoin" />
-      <p className="mt-4 text-sm text-muted-foreground">Scanning blockchain…</p>
-    </div>
-  );
 }
+
