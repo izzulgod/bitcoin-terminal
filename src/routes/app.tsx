@@ -5,6 +5,7 @@ import { useAppStore } from "@/store/app";
 import { BottomNav } from "@/components/bottom-nav";
 import { SyncGate } from "@/components/sync-gate";
 import { Bitcoin } from "lucide-react";
+import { verifyPin, hashPin, isHashedPin } from "@/lib/pin";
 
 export const Route = createFileRoute("/app")({
   component: AppLayout,
