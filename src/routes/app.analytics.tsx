@@ -107,7 +107,7 @@ function Analytics() {
   }, [incoming]);
 
   const firstReceive = incoming[0];
-  const totalReceivedSats = acquiredSats;
+  
 
   return (
     <div className="px-5 pt-6">
