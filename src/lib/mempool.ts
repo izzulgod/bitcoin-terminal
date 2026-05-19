@@ -96,15 +96,26 @@ export interface PriceData {
   usd_24h_change: number;
 }
 
-// CoinGecko public endpoint — no key needed
+// CoinGecko public endpoint — no key needed. Routed via /api/public/coingecko in
+// the browser to avoid CORS / rate-limit failures that would otherwise make the
+// chart silently empty (breaking PnL cost-basis math).
+const CG_BASE = "https://api.coingecko.com/api/v3";
+async function cgGet<T>(path: string): Promise<T> {
+  const url =
+    typeof window === "undefined"
+      ? `${CG_BASE}${path}`
+      : `/api/public/coingecko?path=${encodeURIComponent(path)}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`coingecko ${path} -> ${res.status}`);
+  return (await res.json()) as T;
+}
+
 export async function fetchPrice(): Promise<PriceData> {
-  const res = await fetch(
-    "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,idr&include_24hr_change=true"
-  );
-  if (!res.ok) throw new Error("price fetch failed");
-  const data = (await res.json()) as {
+  const data = await cgGet<{
     bitcoin: { usd: number; idr: number; usd_24h_change: number };
-  };
+  }>(
+    "/simple/price?ids=bitcoin&vs_currencies=usd,idr&include_24hr_change=true"
+  );
   return {
     usd: data.bitcoin.usd,
     idr: data.bitcoin.idr,
@@ -117,11 +128,9 @@ export interface MarketChartPoint {
   v: number;
 }
 export async function fetchMarketChart(days: number | "max"): Promise<MarketChartPoint[]> {
-  const res = await fetch(
-    `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`
+  const data = await cgGet<{ prices: [number, number][] }>(
+    `/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`
   );
-  if (!res.ok) throw new Error("chart fetch failed");
-  const data = (await res.json()) as { prices: [number, number][] };
   return data.prices.map(([t, v]) => ({ t, v }));
 }
 
@@ -136,3 +145,4 @@ export async function fetchFearGreed(): Promise<{ value: number; classification:
     classification: data.data[0].value_classification,
   };
 }
+
