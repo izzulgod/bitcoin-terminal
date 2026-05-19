@@ -176,10 +176,11 @@ function SettingsScreen() {
                 Cancel
               </button>
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (newPin.length !== 6) return toast.error("PIN must be 6 digits");
                   if (newPin !== pinConfirm) return toast.error("PINs do not match");
-                  updateSettings({ pin: newPin, pinEnabled: true });
+                  const hashed = await hashPin(newPin);
+                  updateSettings({ pin: hashed, pinEnabled: true });
                   setPinDialog(false);
                   setNewPin("");
                   setPinConfirm("");
