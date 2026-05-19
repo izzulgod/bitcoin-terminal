@@ -18,6 +18,7 @@ import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppMempoolRouteImport } from './routes/app.mempool'
 import { Route as AppAnalyticsRouteImport } from './routes/app.analytics'
 import { Route as ApiPublicMempoolRouteImport } from './routes/api/public/mempool'
+import { Route as ApiPublicCoingeckoRouteImport } from './routes/api/public/coingecko'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -64,6 +65,11 @@ const ApiPublicMempoolRoute = ApiPublicMempoolRouteImport.update({
   path: '/api/public/mempool',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCoingeckoRoute = ApiPublicCoingeckoRouteImport.update({
+  id: '/api/public/coingecko',
+  path: '/api/public/coingecko',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/': typeof AppIndexRoute
+  '/api/public/coingecko': typeof ApiPublicCoingeckoRoute
   '/api/public/mempool': typeof ApiPublicMempoolRoute
 }
 export interface FileRoutesByTo {
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app': typeof AppIndexRoute
+  '/api/public/coingecko': typeof ApiPublicCoingeckoRoute
   '/api/public/mempool': typeof ApiPublicMempoolRoute
 }
 export interface FileRoutesById {
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/': typeof AppIndexRoute
+  '/api/public/coingecko': typeof ApiPublicCoingeckoRoute
   '/api/public/mempool': typeof ApiPublicMempoolRoute
 }
 export interface FileRouteTypes {
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/wallet'
     | '/app/'
+    | '/api/public/coingecko'
     | '/api/public/mempool'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/wallet'
     | '/app'
+    | '/api/public/coingecko'
     | '/api/public/mempool'
   id:
     | '__root__'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/wallet'
     | '/app/'
+    | '/api/public/coingecko'
     | '/api/public/mempool'
   fileRoutesById: FileRoutesById
 }
@@ -137,6 +149,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiPublicCoingeckoRoute: typeof ApiPublicCoingeckoRoute
   ApiPublicMempoolRoute: typeof ApiPublicMempoolRoute
 }
 
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMempoolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/coingecko': {
+      id: '/api/public/coingecko'
+      path: '/api/public/coingecko'
+      fullPath: '/api/public/coingecko'
+      preLoaderRoute: typeof ApiPublicCoingeckoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -230,8 +250,19 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiPublicCoingeckoRoute: ApiPublicCoingeckoRoute,
   ApiPublicMempoolRoute: ApiPublicMempoolRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
