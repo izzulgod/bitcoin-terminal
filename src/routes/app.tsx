@@ -12,7 +12,7 @@ export const Route = createFileRoute("/app")({
 });
 
 function AppLayout() {
-  const { hydrated, wallet, settings, unlocked, hydrate, unlock } = useAppStore();
+  const { hydrated, wallet, settings, unlocked, hydrate, unlock, updateSettings } = useAppStore();
   const navigate = useNavigate();
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
