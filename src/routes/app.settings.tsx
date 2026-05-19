@@ -10,6 +10,7 @@ import {
   Bitcoin,
 } from "lucide-react";
 import { toast } from "sonner";
+import { hashPin } from "@/lib/pin";
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsScreen,
