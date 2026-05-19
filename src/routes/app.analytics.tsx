@@ -155,9 +155,15 @@ function Analytics() {
           </div>
         </div>
         <div className="mt-3 text-[10px] text-muted-foreground">
-          Cost basis priced per-tx using historical BTC/USD at each receive's block time,
-          converted to {currency} at the current FX rate. Pro-rated for spent sats.
+          {chart.isLoading && incoming.length > 0
+            ? "Loading historical BTC prices to compute cost basis…"
+            : chart.isError
+              ? "Could not load historical BTC prices — PnL unavailable. Retry later."
+              : pricedCount < incoming.length && incoming.length > 0
+                ? `Priced ${pricedCount}/${incoming.length} receives using historical BTC/USD; some too recent or missing from history.`
+                : `Cost basis priced per-tx using historical BTC/USD at each receive's block time, converted to ${currency} at the current FX rate. Pro-rated for spent sats.`}
         </div>
+
       </section>
 
       {/* Accumulation timeline */}
