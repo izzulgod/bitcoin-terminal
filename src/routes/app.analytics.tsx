@@ -16,9 +16,8 @@ const ALL_TIME_HIGH_USD = 109_000; // updated reference point
 function Analytics() {
   const { data: sync } = useSync();
   const price = usePrice();
-  // "max" gives daily historical prices since 2013 — enough to price every
-  // tx, even years old. Free CoinGecko allows this.
-  const chart = useMarketChart("max");
+  // CoinGecko free tier caps historical range to 365 days — "max" returns 401.
+  const chart = useMarketChart(365);
   const currency = useAppStore((s) => s.settings.currency);
 
   const owned = useMemo(
