@@ -52,9 +52,19 @@ function AppLayout() {
         />
         {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
         <button
-          onClick={() => {
-            if (pin === settings.pin) unlock();
-            else setError("Incorrect PIN");
+          onClick={async () => {
+            if (!settings.pin) return;
+            const ok = await verifyPin(pin, settings.pin);
+            if (ok) {
+              // Migrate legacy plain-text PIN to hashed form on first successful unlock.
+              if (!isHashedPin(settings.pin)) {
+                const hashed = await hashPin(pin);
+                updateSettings({ pin: hashed });
+              }
+              unlock();
+            } else {
+              setError("Incorrect PIN");
+            }
           }}
           className="mt-6 rounded-lg bg-bitcoin px-8 py-2.5 font-semibold text-primary-foreground"
         >
