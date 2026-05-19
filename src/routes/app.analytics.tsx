@@ -57,19 +57,23 @@ function Analytics() {
 
   // Compute cost basis in USD using historical price at each receive,
   // then pro-rate by remaining balance / total acquired (FIFO-ish estimate).
-  const { costBasisUsd, acquiredSats, avgPriceUsd } = useMemo(() => {
+  const { costBasisUsd, acquiredSats, avgPriceUsd, pricedCount } = useMemo(() => {
     let cb = 0;
     let acq = 0;
+    let priced = 0;
     for (const f of incoming) {
       const ts = (f.tx.status.block_time as number) * 1000;
-      const p = priceAtMs(ts) ?? price.data?.usd ?? 0;
+      const p = priceAtMs(ts);
+      if (p == null) continue; // skip if historical price unavailable — don't fake it
       const btc = satsToBtc(f.net);
       cb += btc * p;
       acq += f.net;
+      priced++;
     }
     const avg = acq > 0 ? cb / satsToBtc(acq) : 0;
-    return { costBasisUsd: cb, acquiredSats: acq, avgPriceUsd: avg };
-  }, [incoming, priceAtMs, price.data]);
+    return { costBasisUsd: cb, acquiredSats: acq, avgPriceUsd: avg, pricedCount: priced };
+  }, [incoming, priceAtMs]);
+
 
   const totalBalanceSats = sync?.totalBalance ?? 0;
   const totalBtc = satsToBtc(totalBalanceSats);
