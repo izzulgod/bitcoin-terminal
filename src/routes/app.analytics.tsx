@@ -16,9 +16,8 @@ const ALL_TIME_HIGH_USD = 109_000; // updated reference point
 function Analytics() {
   const { data: sync } = useSync();
   const price = usePrice();
-  // "max" gives daily historical prices since 2013 — enough to price every
-  // tx, even years old. Free CoinGecko allows this.
-  const chart = useMarketChart("max");
+  // CoinGecko free tier caps historical range to 365 days — "max" returns 401.
+  const chart = useMarketChart(365);
   const currency = useAppStore((s) => s.settings.currency);
 
   const owned = useMemo(
@@ -55,24 +54,28 @@ function Analytics() {
   const priceVal = price.data ? (currency === "USD" ? price.data.usd : price.data.idr) : 0;
   const usdToCurrency = price.data && price.data.usd > 0 ? priceVal / price.data.usd : 1;
 
-  // Compute cost basis in USD using historical price at each receive,
-  // then pro-rate by remaining balance / total acquired (FIFO-ish estimate).
-  const { costBasisUsd, acquiredSats, avgPriceUsd, pricedCount } = useMemo(() => {
+  // Compute cost basis in USD using historical price at each receive.
+  // Fallback: if no historical price (chart failed or tx older than 365d),
+  // use current price so PnL still shows something meaningful rather than 0.
+  const { costBasisUsd, acquiredSats, avgPriceUsd, pricedCount, totalReceivedSats } = useMemo(() => {
     let cb = 0;
     let acq = 0;
     let priced = 0;
+    let received = 0;
+    const fallback = price.data?.usd ?? 0;
     for (const f of incoming) {
+      received += f.net;
       const ts = (f.tx.status.block_time as number) * 1000;
-      const p = priceAtMs(ts);
-      if (p == null) continue; // skip if historical price unavailable — don't fake it
+      const p = priceAtMs(ts) ?? (fallback > 0 ? fallback : null);
+      if (p == null) continue;
       const btc = satsToBtc(f.net);
       cb += btc * p;
       acq += f.net;
-      priced++;
+      if (priceAtMs(ts) != null) priced++;
     }
     const avg = acq > 0 ? cb / satsToBtc(acq) : 0;
-    return { costBasisUsd: cb, acquiredSats: acq, avgPriceUsd: avg, pricedCount: priced };
-  }, [incoming, priceAtMs]);
+    return { costBasisUsd: cb, acquiredSats: acq, avgPriceUsd: avg, pricedCount: priced, totalReceivedSats: received };
+  }, [incoming, priceAtMs, price.data]);
 
 
   const totalBalanceSats = sync?.totalBalance ?? 0;
@@ -104,7 +107,7 @@ function Analytics() {
   }, [incoming]);
 
   const firstReceive = incoming[0];
-  const totalReceivedSats = acquiredSats;
+  
 
   return (
     <div className="px-5 pt-6">
