@@ -24,7 +24,7 @@ type State = {
 
 export const useAppStore = create<State>((set, get) => ({
   wallet: null,
-  settings: { currency: "USD", pin: null, pinEnabled: false },
+  settings: { currency: "USD", pin: null, pinEnabled: false, theme: "dark" },
   unlocked: false,
   hydrated: false,
   hydrate: () => {
