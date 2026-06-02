@@ -49,6 +49,8 @@ function Landing() {
 
   function handleConfirm() {
     if (!detected) return;
+    const label = walletLabel.trim();
+    if (!label) return setError("Wallet name is required");
     const finalScriptType = detected.scriptLocked ? detected.scriptType : scriptType;
     const finalWallet = detectAndNormalize(detected.normalizedXpub, finalScriptType);
     if (usePin) {
@@ -65,7 +67,7 @@ function Landing() {
       scriptType: finalWallet.scriptType,
       derivationLabel: scriptTypeLabel(finalWallet.scriptType),
       network: finalWallet.network,
-      label: "Ledger Wallet",
+      label,
       createdAt: Date.now(),
     });
     toast.success("Wallet imported");
