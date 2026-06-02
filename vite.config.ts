@@ -10,7 +10,6 @@ import { nitro } from "nitro/vite";
 // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
 // Nitro builds the Vercel server output; the Cloudflare build plugin must be disabled for Vercel.
 export default defineConfig({
-  cloudflare: false,
   tanstackStart: {
     server: { entry: "server" },
   },
