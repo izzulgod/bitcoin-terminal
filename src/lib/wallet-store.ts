@@ -18,12 +18,14 @@ export interface Settings {
   currency: "USD" | "IDR";
   pin: string | null; // 6-digit PIN (stored client-side; watch-only access gate only)
   pinEnabled: boolean;
+  theme: "dark" | "light";
 }
 
 const DEFAULT_SETTINGS: Settings = {
   currency: "USD",
   pin: null,
   pinEnabled: false,
+  theme: "dark",
 };
 
 export function loadWallet(): StoredWallet | null {
