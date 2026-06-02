@@ -18,12 +18,13 @@ type State = {
   unlock: () => void;
   lock: () => void;
   clearWallet: () => void;
+  renameWallet: (label: string) => void;
   hydrate: () => void;
 };
 
 export const useAppStore = create<State>((set, get) => ({
   wallet: null,
-  settings: { currency: "USD", pin: null, pinEnabled: false },
+  settings: { currency: "USD", pin: null, pinEnabled: false, theme: "dark" },
   unlocked: false,
   hydrated: false,
   hydrate: () => {
@@ -53,5 +54,12 @@ export const useAppStore = create<State>((set, get) => ({
   clearWallet: () => {
     clearStored();
     set({ wallet: null });
+  },
+  renameWallet: (label) => {
+    const w = get().wallet;
+    if (!w) return;
+    const next = { ...w, label };
+    saveWallet(next);
+    set({ wallet: next });
   },
 }));
