@@ -4,13 +4,18 @@ import { useAppStore } from "@/store/app";
 import {
   Trash2,
   KeyRound,
-  Globe2,
   Github,
   ChevronRight,
   Bitcoin,
+  Pencil,
+  Sun,
+  Moon,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { hashPin } from "@/lib/pin";
+
+const GITHUB_URL = "https://github.com/izzulgod/bitcoin-terminal";
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsScreen,
