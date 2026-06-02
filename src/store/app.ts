@@ -55,4 +55,11 @@ export const useAppStore = create<State>((set, get) => ({
     clearStored();
     set({ wallet: null });
   },
+  renameWallet: (label) => {
+    const w = get().wallet;
+    if (!w) return;
+    const next = { ...w, label };
+    saveWallet(next);
+    set({ wallet: next });
+  },
 }));
