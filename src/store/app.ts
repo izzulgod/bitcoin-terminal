@@ -18,6 +18,7 @@ type State = {
   unlock: () => void;
   lock: () => void;
   clearWallet: () => void;
+  renameWallet: (label: string) => void;
   hydrate: () => void;
 };
 
