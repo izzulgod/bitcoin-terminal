@@ -230,6 +230,52 @@ function SettingsScreen() {
           </div>
         </div>
       )}
+
+      {renameDialog && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 backdrop-blur-sm sm:items-center"
+          onClick={() => setRenameDialog(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md rounded-t-3xl bg-card p-6 sm:rounded-2xl"
+          >
+            <h3 className="text-lg font-bold">Rename wallet</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Give this wallet a label that's meaningful to you.
+            </p>
+            <input
+              type="text"
+              value={labelDraft}
+              onChange={(e) => setLabelDraft(e.target.value)}
+              maxLength={40}
+              placeholder="My Bitcoin wallet"
+              className="mt-4 w-full rounded-xl border border-border bg-background p-3 text-sm"
+              autoFocus
+            />
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={() => setRenameDialog(false)}
+                className="flex-1 rounded-lg border border-border bg-background py-2.5 text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const t = labelDraft.trim();
+                  if (!t) return toast.error("Name cannot be empty");
+                  renameWallet(t);
+                  setRenameDialog(false);
+                  toast.success("Wallet renamed");
+                }}
+                className="flex-1 rounded-lg bg-bitcoin py-2.5 text-sm font-semibold text-primary-foreground"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
