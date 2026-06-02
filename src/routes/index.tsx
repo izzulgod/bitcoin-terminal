@@ -275,6 +275,8 @@ function DetectScreen({
 }
 
 function SecurityScreen({
+  walletLabel,
+  setWalletLabel,
   usePin,
   setUsePin,
   pin,
@@ -284,6 +286,8 @@ function SecurityScreen({
   error,
   onConfirm,
 }: {
+  walletLabel: string;
+  setWalletLabel: (s: string) => void;
   usePin: boolean;
   setUsePin: (v: boolean) => void;
   pin: string;
@@ -295,12 +299,29 @@ function SecurityScreen({
 }) {
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-10">
-      <h2 className="text-2xl font-bold">Lock your terminal</h2>
+      <h2 className="text-2xl font-bold">Name & lock</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Optional 6-digit PIN gates access on this device. Watch-only — no funds at risk.
+        Give this wallet a label, then optionally set a 6-digit PIN.
       </p>
 
-      <label className="mt-6 flex items-center justify-between rounded-xl border border-border bg-card p-4">
+      <div className="mt-6 rounded-xl border border-border bg-card p-4">
+        <label className="text-xs uppercase tracking-wider text-muted-foreground">
+          Wallet name
+        </label>
+        <input
+          type="text"
+          value={walletLabel}
+          onChange={(e) => setWalletLabel(e.target.value)}
+          maxLength={40}
+          placeholder="e.g. Ledger, Cold Stack, Savings"
+          className="mt-2 w-full rounded-lg border border-border bg-background p-3 text-sm focus:border-bitcoin focus:outline-none"
+        />
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          You can rename it anytime from Settings.
+        </p>
+      </div>
+
+      <label className="mt-4 flex items-center justify-between rounded-xl border border-border bg-card p-4">
         <div>
           <div className="font-semibold">Enable PIN</div>
           <div className="text-xs text-muted-foreground">Required on app open</div>
