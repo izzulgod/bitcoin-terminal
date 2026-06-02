@@ -101,15 +101,23 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const hydrate = useAppStore((s) => s.hydrate);
+  const theme = useAppStore((s) => s.settings.theme);
 
   useEffect(() => {
     hydrate();
   }, [hydrate]);
 
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    root.classList.remove("dark", "light");
+    root.classList.add(theme === "light" ? "light" : "dark");
+  }, [theme]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
-      <Toaster theme="dark" position="top-center" />
+      <Toaster theme={theme === "light" ? "light" : "dark"} position="top-center" />
     </QueryClientProvider>
   );
 }
