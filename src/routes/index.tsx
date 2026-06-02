@@ -22,6 +22,7 @@ function Landing() {
   const [pin, setPin] = useState("");
   const [pinConfirm, setPinConfirm] = useState("");
   const [usePin, setUsePin] = useState(false);
+  const [walletLabel, setWalletLabel] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
