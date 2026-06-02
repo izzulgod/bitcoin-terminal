@@ -15,15 +15,5 @@ export default defineConfig({
   },
   vite: {
     plugins: [nitro({ preset: "vercel" })],
-    resolve: {
-      alias: {
-        buffer: "buffer/index.js",
-      },
-    },
-    build: {
-      commonjsOptions: {
-        transformMixedEsModules: true,
-      },
-    },
   },
 });
