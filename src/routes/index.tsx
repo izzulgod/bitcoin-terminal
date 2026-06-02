@@ -98,6 +98,8 @@ function Landing() {
       )}
       {step === "security" && (
         <SecurityScreen
+          walletLabel={walletLabel}
+          setWalletLabel={setWalletLabel}
           usePin={usePin}
           setUsePin={setUsePin}
           pin={pin}
