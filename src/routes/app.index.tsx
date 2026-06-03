@@ -150,7 +150,10 @@ function Home() {
                     borderRadius: 8,
                     fontSize: 12,
                   }}
-                  labelFormatter={(t) => new Date(t as number).toLocaleString()}
+                  labelFormatter={(_, payload) => {
+                    const t = payload?.[0]?.payload?.t as number | undefined;
+                    return t ? new Date(t).toLocaleString() : "";
+                  }}
                   formatter={(v: number) => [`$${v.toFixed(0)}`, "BTC"]}
                 />
                 <Line
@@ -307,9 +310,9 @@ function TxRow({
           </div>
         </div>
       </div>
-      <div className="text-right">
+      <div className="text-right pl-2 shrink-0">
         <div
-          className={`font-mono text-sm font-semibold ${
+          className={`font-mono text-sm font-semibold whitespace-nowrap ${
             incoming ? "text-success" : "text-foreground"
           }`}
         >

@@ -74,7 +74,9 @@ function Landing() {
     navigate({ to: "/app", replace: true });
   }
 
-  if (!hydrated) return null;
+  // Avoid flashing the landing/onboarding while we're still hydrating, or once
+  // we know a wallet exists (the effect above will navigate to /app).
+  if (!hydrated || wallet) return null;
 
   return (
     <main className="min-h-screen overflow-hidden">
@@ -316,9 +318,13 @@ function SecurityScreen({
           placeholder="e.g. Ledger, Cold Stack, Savings"
           className="mt-2 w-full rounded-lg border border-border bg-background p-3 text-sm focus:border-bitcoin focus:outline-none"
         />
-        <p className="mt-1 text-[11px] text-muted-foreground">
-          You can rename it anytime from Settings.
-        </p>
+        {error && /wallet name/i.test(error) ? (
+          <p className="mt-2 text-sm text-destructive">{error}</p>
+        ) : (
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            You can rename it anytime from Settings.
+          </p>
+        )}
       </div>
 
       <label className="mt-4 flex items-center justify-between rounded-xl border border-border bg-card p-4">
@@ -357,7 +363,9 @@ function SecurityScreen({
         </div>
       )}
 
-      {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
+      {error && !/wallet name/i.test(error) && (
+        <p className="mt-3 text-sm text-destructive">{error}</p>
+      )}
 
       <button
         onClick={onConfirm}
