@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  Copy,
   RefreshCw,
   TrendingUp,
   TrendingDown,
@@ -11,6 +8,8 @@ import {
   Flame,
   Zap,
   Bitcoin,
+  ArrowDownLeft,
+  ArrowUpRight,
 } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, Tooltip, YAxis } from "recharts";
 import { useAppStore } from "@/store/app";
@@ -22,9 +21,11 @@ import {
   usePrice,
   useSync,
 } from "@/hooks/use-bitcoin-data";
-import { classifyTxs } from "@/lib/sync-engine";
-import { formatBtc, formatFiat, satsToBtc, shortAddr, shortTxid, timeAgo } from "@/lib/format";
-import { toast } from "sonner";
+import { formatBtc, formatFiat, satsToBtc } from "@/lib/format";
+import { LedgerIndicator } from "@/components/ledger-indicator";
+import { WalletSwitcher } from "@/components/wallet-switcher";
+import { ReceiveModal } from "@/components/receive-modal";
+import { SendModal } from "@/components/send-modal";
 
 export const Route = createFileRoute("/app/")({
   component: Home,
@@ -47,31 +48,27 @@ function Home() {
   const fng = useFearGreed();
   const fees = useFees();
   const mempool = useMempoolStats();
+  const [showSend, setShowSend] = useState(false);
+  const [showReceive, setShowReceive] = useState(false);
 
   const currency = settings.currency;
   const priceVal = price.data ? (currency === "USD" ? price.data.usd : price.data.idr) : 0;
   const totalBtc = sync ? satsToBtc(sync.totalBalance) : 0;
   const fiatVal = totalBtc * priceVal;
 
-  const txFlows = useMemo(() => {
-    if (!sync) return [];
-    const owned = new Set(sync.addresses.map((a) => a.derived.address));
-    const tipHeight =
-      sync.txs.find((t) => t.status.confirmed && t.status.block_height)?.status.block_height ?? 0;
-    return classifyTxs(sync.txs, owned, tipHeight + 6);
-  }, [sync]);
-
   return (
     <div className="px-5 pt-6">
       {/* Top bar */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="rounded-lg bg-bitcoin/15 p-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="rounded-lg bg-bitcoin/15 p-1.5 shrink-0">
             <Bitcoin className="h-4 w-4 text-bitcoin" />
           </div>
-          <span className="text-sm font-semibold">Bitcoin Terminal</span>
+          <span className="truncate text-sm font-semibold">Bitcoin Terminal</span>
+          <WalletSwitcher />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
+          <LedgerIndicator />
           <button
             onClick={() =>
               updateSettings({ currency: currency === "USD" ? "IDR" : "USD" })
@@ -105,9 +102,23 @@ function Home() {
           <div className="text-base text-muted-foreground">
             {price.data ? formatFiat(fiatVal, currency) : "—"}
           </div>
-          {price.data && (
-            <Delta value={price.data.usd_24h_change} suffix="%" />
-          )}
+          {price.data && <Delta value={price.data.usd_24h_change} suffix="%" />}
+        </div>
+
+        {/* Send / Receive */}
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <button
+            onClick={() => setShowSend(true)}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 text-sm font-semibold"
+          >
+            <ArrowUpRight className="h-4 w-4" /> Send
+          </button>
+          <button
+            onClick={() => setShowReceive(true)}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-bitcoin py-3 text-sm font-semibold text-primary-foreground"
+          >
+            <ArrowDownLeft className="h-4 w-4" /> Receive
+          </button>
         </div>
       </section>
 
@@ -197,46 +208,8 @@ function Home() {
         />
       </section>
 
-      {/* Quick actions */}
-      <section className="mt-5 rounded-2xl border border-border bg-card p-4">
-        <div className="text-xs uppercase tracking-wider text-muted-foreground">
-          Receive address
-        </div>
-        <div className="mt-2 flex items-center justify-between gap-2">
-          <div className="font-mono text-sm break-all">
-            {sync ? shortAddr(sync.receiveAddress, 10) : "—"}
-          </div>
-          <button
-            onClick={() => {
-              if (sync) {
-                navigator.clipboard.writeText(sync.receiveAddress);
-                toast.success("Address copied");
-              }
-            }}
-            className="rounded-lg border border-border bg-background p-2"
-          >
-            <Copy className="h-4 w-4" />
-          </button>
-        </div>
-      </section>
-
-      {/* Recent txs */}
-      <section className="mt-5">
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-sm font-semibold">Recent activity</h3>
-          <span className="text-xs text-muted-foreground">{txFlows.length} txs</span>
-        </div>
-        <div className="space-y-2">
-          {txFlows.slice(0, 8).map((flow) => (
-            <TxRow key={flow.tx.txid} flow={flow} />
-          ))}
-          {txFlows.length === 0 && (
-            <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              No transactions yet.
-            </div>
-          )}
-        </div>
-      </section>
+      {showSend && <SendModal onClose={() => setShowSend(false)} />}
+      {showReceive && <ReceiveModal onClose={() => setShowReceive(false)} />}
     </div>
   );
 }
@@ -273,58 +246,6 @@ function InsightCard({
         {label}
       </div>
       <div className="mt-1 font-mono text-sm font-semibold">{value}</div>
-    </div>
-  );
-}
-
-function TxRow({
-  flow,
-}: {
-  flow: { tx: { txid: string; status: { confirmed: boolean; block_time?: number } }; net: number; direction: "in" | "out" | "self"; confirmations: number };
-}) {
-  const incoming = flow.direction === "in";
-  return (
-    <div className="flex items-center justify-between rounded-xl border border-border bg-card p-3">
-      <div className="flex items-center gap-3">
-        <div
-          className={`rounded-lg p-2 ${
-            incoming ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
-          }`}
-        >
-          {incoming ? (
-            <ArrowDownLeft className="h-4 w-4" />
-          ) : (
-            <ArrowUpRight className="h-4 w-4" />
-          )}
-        </div>
-        <div>
-          <div className="text-sm font-semibold">
-            {incoming ? "Received" : flow.direction === "self" ? "Self-send" : "Sent"}
-          </div>
-          <div className="font-mono text-[11px] text-muted-foreground">
-            {shortTxid(flow.tx.txid)}
-            {" · "}
-            {flow.tx.status.block_time
-              ? timeAgo(flow.tx.status.block_time)
-              : "Unconfirmed"}
-          </div>
-        </div>
-      </div>
-      <div className="text-right pl-2 shrink-0">
-        <div
-          className={`font-mono text-sm font-semibold whitespace-nowrap ${
-            incoming ? "text-success" : "text-foreground"
-          }`}
-        >
-          {incoming ? "+" : ""}
-          {formatBtc(flow.net)} BTC
-        </div>
-        <div className="text-[11px] text-muted-foreground">
-          {flow.confirmations === 0
-            ? "0 conf"
-            : `${flow.confirmations.toLocaleString()} conf`}
-        </div>
-      </div>
     </div>
   );
 }

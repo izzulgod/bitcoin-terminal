@@ -2,18 +2,20 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAppStore } from "@/store/app";
 import {
-  Trash2,
   KeyRound,
   Github,
   ChevronRight,
-  Bitcoin,
-  Pencil,
   Sun,
   Moon,
   ExternalLink,
+  Wallet as WalletIcon,
+  Plus,
+  Trash2,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { hashPin } from "@/lib/pin";
+import { ModalShell } from "@/components/receive-modal";
 
 const GITHUB_URL = "https://github.com/izzulgod/bitcoin-terminal";
 
@@ -23,14 +25,39 @@ export const Route = createFileRoute("/app/settings")({
 
 function SettingsScreen() {
   const navigate = useNavigate();
-  const { wallet, settings, updateSettings, clearWallet, lock, renameWallet } = useAppStore();
-  const [confirming, setConfirming] = useState(false);
+  const { wallets, activeWalletId, settings, updateSettings, removeWallet, setActiveWallet, clearWallet, lock } =
+    useAppStore();
   const [pinDialog, setPinDialog] = useState(false);
   const [newPin, setNewPin] = useState("");
   const [pinConfirm, setPinConfirm] = useState("");
-  const [renameDialog, setRenameDialog] = useState(false);
-  const [labelDraft, setLabelDraft] = useState("");
+  const [manageOpen, setManageOpen] = useState(false);
+  const [dangerForId, setDangerForId] = useState<string | null>(null);
+  const [dangerConfirmText, setDangerConfirmText] = useState("");
   const isLight = settings.theme === "light";
+
+  function handleRemove(id: string) {
+    if (wallets.length === 1) {
+      setDangerForId(id);
+      setDangerConfirmText("");
+      return;
+    }
+    removeWallet(id);
+    toast.success("Wallet removed");
+  }
+
+  function confirmDangerDelete() {
+    if (dangerConfirmText !== "DELETE") {
+      toast.error('Type "DELETE" exactly to confirm');
+      return;
+    }
+    clearWallet();
+    updateSettings({ pin: null, pinEnabled: false });
+    lock();
+    setDangerForId(null);
+    setManageOpen(false);
+    toast.success("All wallets removed");
+    navigate({ to: "/" });
+  }
 
   return (
     <div className="px-5 pt-6">
@@ -39,30 +66,13 @@ function SettingsScreen() {
         <p className="mt-1 text-xs text-muted-foreground">Manage wallet & preferences</p>
       </header>
 
-      <Section title="Wallet">
-        <div className="rounded-xl border border-border bg-card p-4">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-bitcoin/10 p-2">
-              <Bitcoin className="h-4 w-4 text-bitcoin" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="font-semibold truncate">{wallet?.label ?? "Wallet"}</div>
-              <div className="font-mono text-[11px] text-muted-foreground truncate">
-                {wallet?.derivationLabel}
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                setLabelDraft(wallet?.label ?? "");
-                setRenameDialog(true);
-              }}
-              className="rounded-lg border border-border bg-background p-2 text-muted-foreground hover:text-foreground"
-              aria-label="Rename wallet"
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
+      <Section title="Wallets">
+        <Row
+          label="Manage Wallets"
+          value={`${wallets.length} stored`}
+          onClick={() => setManageOpen(true)}
+          icon={<WalletIcon className="h-4 w-4" />}
+        />
       </Section>
 
       <Section title="Preferences">
@@ -114,167 +124,160 @@ function SettingsScreen() {
         <Row label="Bitcoin Terminal" value="v1.0" />
       </Section>
 
-      <Section title="Danger">
-        {!confirming ? (
-          <button
-            onClick={() => setConfirming(true)}
-            className="flex w-full items-center justify-between rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-left text-destructive"
-          >
-            <span className="flex items-center gap-3 font-semibold">
-              <Trash2 className="h-4 w-4" /> Remove wallet
-            </span>
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        ) : (
-          <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4">
-            <div className="text-sm font-semibold text-destructive">
-              Remove wallet from this device?
-            </div>
-            <div className="mt-1 text-xs text-muted-foreground">
-              You can re-import any time using your xpub.
-            </div>
-            <div className="mt-3 flex gap-2">
-              <button
-                onClick={() => setConfirming(false)}
-                className="flex-1 rounded-lg border border-border bg-card py-2 text-sm"
-              >
-                Cancel
-              </button>
+      {pinDialog && (
+        <ModalShell title="PIN lock" onClose={() => setPinDialog(false)}>
+          <p className="text-xs text-muted-foreground">
+            {settings.pinEnabled
+              ? "Disable or replace your PIN."
+              : "Set a 6-digit PIN to gate access on this device."}
+          </p>
+          <div className="mt-4 space-y-2">
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={6}
+              value={newPin}
+              onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
+              placeholder="New PIN"
+              className="w-full rounded-xl border border-border bg-background p-3 text-center font-mono text-lg tracking-[0.5em]"
+            />
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={6}
+              value={pinConfirm}
+              onChange={(e) => setPinConfirm(e.target.value.replace(/\D/g, ""))}
+              placeholder="Confirm PIN"
+              className="w-full rounded-xl border border-border bg-background p-3 text-center font-mono text-lg tracking-[0.5em]"
+            />
+          </div>
+          <div className="mt-4 flex gap-2">
+            {settings.pinEnabled && (
               <button
                 onClick={() => {
-                  clearWallet();
                   updateSettings({ pin: null, pinEnabled: false });
-                  lock();
-                  toast.success("Wallet removed");
-                  navigate({ to: "/" });
-                }}
-                className="flex-1 rounded-lg bg-destructive py-2 text-sm font-semibold text-destructive-foreground"
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-        )}
-      </Section>
-
-      {pinDialog && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 backdrop-blur-sm sm:items-center"
-          onClick={() => setPinDialog(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md rounded-t-3xl bg-card p-6 sm:rounded-2xl"
-          >
-            <h3 className="text-lg font-bold">PIN lock</h3>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {settings.pinEnabled
-                ? "Disable or replace your PIN."
-                : "Set a 6-digit PIN to gate access on this device."}
-            </p>
-            <div className="mt-4 space-y-2">
-              <input
-                type="password"
-                inputMode="numeric"
-                maxLength={6}
-                value={newPin}
-                onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
-                placeholder="New PIN"
-                className="w-full rounded-xl border border-border bg-background p-3 text-center font-mono text-lg tracking-[0.5em]"
-              />
-              <input
-                type="password"
-                inputMode="numeric"
-                maxLength={6}
-                value={pinConfirm}
-                onChange={(e) => setPinConfirm(e.target.value.replace(/\D/g, ""))}
-                placeholder="Confirm PIN"
-                className="w-full rounded-xl border border-border bg-background p-3 text-center font-mono text-lg tracking-[0.5em]"
-              />
-            </div>
-            <div className="mt-4 flex gap-2">
-              {settings.pinEnabled && (
-                <button
-                  onClick={() => {
-                    updateSettings({ pin: null, pinEnabled: false });
-                    setPinDialog(false);
-                    toast.success("PIN disabled");
-                  }}
-                  className="flex-1 rounded-lg border border-destructive/30 bg-destructive/5 py-2.5 text-sm font-semibold text-destructive"
-                >
-                  Disable
-                </button>
-              )}
-              <button
-                onClick={() => setPinDialog(false)}
-                className="flex-1 rounded-lg border border-border bg-background py-2.5 text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={async () => {
-                  if (newPin.length !== 6) return toast.error("PIN must be 6 digits");
-                  if (newPin !== pinConfirm) return toast.error("PINs do not match");
-                  const hashed = await hashPin(newPin);
-                  updateSettings({ pin: hashed, pinEnabled: true });
                   setPinDialog(false);
-                  setNewPin("");
-                  setPinConfirm("");
-                  toast.success("PIN updated");
+                  toast.success("PIN disabled");
                 }}
-                className="flex-1 rounded-lg bg-bitcoin py-2.5 text-sm font-semibold text-primary-foreground"
+                className="flex-1 rounded-lg border border-destructive/30 bg-destructive/5 py-2.5 text-sm font-semibold text-destructive"
               >
-                Save
+                Disable
               </button>
-            </div>
+            )}
+            <button
+              onClick={() => setPinDialog(false)}
+              className="flex-1 rounded-lg border border-border bg-background py-2.5 text-sm"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={async () => {
+                if (newPin.length !== 6) return toast.error("PIN must be 6 digits");
+                if (newPin !== pinConfirm) return toast.error("PINs do not match");
+                const hashed = await hashPin(newPin);
+                updateSettings({ pin: hashed, pinEnabled: true });
+                setPinDialog(false);
+                setNewPin("");
+                setPinConfirm("");
+                toast.success("PIN updated");
+              }}
+              className="flex-1 rounded-lg bg-bitcoin py-2.5 text-sm font-semibold text-primary-foreground"
+            >
+              Save
+            </button>
           </div>
-        </div>
+        </ModalShell>
       )}
 
-      {renameDialog && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 backdrop-blur-sm sm:items-center"
-          onClick={() => setRenameDialog(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md rounded-t-3xl bg-card p-6 sm:rounded-2xl"
-          >
-            <h3 className="text-lg font-bold">Rename wallet</h3>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Give this wallet a label that's meaningful to you.
-            </p>
-            <input
-              type="text"
-              value={labelDraft}
-              onChange={(e) => setLabelDraft(e.target.value)}
-              maxLength={40}
-              placeholder="My Bitcoin wallet"
-              className="mt-4 w-full rounded-xl border border-border bg-background p-3 text-sm"
-              autoFocus
-            />
-            <div className="mt-4 flex gap-2">
-              <button
-                onClick={() => setRenameDialog(false)}
-                className="flex-1 rounded-lg border border-border bg-background py-2.5 text-sm"
+      {manageOpen && (
+        <ModalShell title="Manage Wallets" onClose={() => setManageOpen(false)}>
+          <div className="space-y-2">
+            {wallets.map((w) => (
+              <div
+                key={w.id}
+                className="flex items-center justify-between gap-2 rounded-xl border border-border bg-background p-3"
               >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  const t = labelDraft.trim();
-                  if (!t) return toast.error("Name cannot be empty");
-                  renameWallet(t);
-                  setRenameDialog(false);
-                  toast.success("Wallet renamed");
-                }}
-                className="flex-1 rounded-lg bg-bitcoin py-2.5 text-sm font-semibold text-primary-foreground"
-              >
-                Save
-              </button>
-            </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <div className="truncate font-semibold">{w.label}</div>
+                    {w.id === activeWalletId && (
+                      <span className="rounded-md bg-bitcoin/10 px-1.5 py-0.5 text-[10px] font-semibold text-bitcoin">
+                        active
+                      </span>
+                    )}
+                  </div>
+                  <div className="truncate font-mono text-[10px] text-muted-foreground">
+                    {w.derivationLabel} · {w.source === "ledger" ? "Ledger" : "xpub"}
+                  </div>
+                </div>
+                {w.id !== activeWalletId && (
+                  <button
+                    onClick={() => setActiveWallet(w.id)}
+                    className="rounded-md border border-border px-2 py-1 text-[11px]"
+                  >
+                    Use
+                  </button>
+                )}
+                <button
+                  onClick={() => handleRemove(w.id)}
+                  className="rounded-md border border-destructive/30 bg-destructive/5 p-1.5 text-destructive"
+                  aria-label="Remove"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
           </div>
-        </div>
+          <button
+            onClick={() => {
+              setManageOpen(false);
+              navigate({ to: "/", search: { add: 1 } as any });
+            }}
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-bitcoin py-3 text-sm font-semibold text-primary-foreground"
+          >
+            <Plus className="h-4 w-4" /> Add Wallet
+          </button>
+        </ModalShell>
+      )}
+
+      {dangerForId && (
+        <ModalShell title="⚠ Danger Zone" onClose={() => setDangerForId(null)}>
+          <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3">
+            <p className="text-sm font-semibold text-destructive">
+              Hapus wallet terakhir?
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Ini akan menghapus seluruh data wallet dari device ini dan
+              mengembalikan aplikasi ke layar onboarding awal. Aksi ini tidak
+              bisa dibatalkan.
+            </p>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Untuk konfirmasi, ketik <span className="font-mono font-bold text-destructive">DELETE</span>:
+          </p>
+          <input
+            value={dangerConfirmText}
+            onChange={(e) => setDangerConfirmText(e.target.value)}
+            placeholder="DELETE"
+            className="mt-2 w-full rounded-lg border border-destructive/40 bg-background p-3 font-mono text-sm"
+            autoFocus
+          />
+          <div className="mt-4 flex gap-2">
+            <button
+              onClick={() => setDangerForId(null)}
+              className="flex-1 rounded-lg border border-border bg-background py-2.5 text-sm"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmDangerDelete}
+              disabled={dangerConfirmText !== "DELETE"}
+              className="flex-1 rounded-lg bg-destructive py-2.5 text-sm font-semibold text-destructive-foreground disabled:opacity-40"
+            >
+              Delete everything
+            </button>
+          </div>
+        </ModalShell>
       )}
     </div>
   );
