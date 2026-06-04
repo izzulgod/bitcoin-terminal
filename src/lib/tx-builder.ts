@@ -99,18 +99,18 @@ export function buildPsbt(p: BuildTxParams): BuildResult {
     const path = p.addressPaths.get(u.address);
     if (!path) throw new Error(`Missing derivation for ${u.address}`);
     // For SegWit, witnessUtxo suffices
-    const scriptPubKey = bitcoin.address.toOutputScript(u.address, network);
+    const scriptPubKey = Buffer.from(bitcoin.address.toOutputScript(u.address, network));
     psbt.addInput({
       hash: u.txid,
       index: u.vout,
-      witnessUtxo: { script: scriptPubKey, value: u.value },
+      witnessUtxo: { script: scriptPubKey, value: BigInt(u.value) },
     });
     inputs.push({ utxo: u, scriptPubKey, derivationPath: path });
   }
 
-  psbt.addOutput({ address: p.recipient, value: p.amountSats });
+  psbt.addOutput({ address: p.recipient, value: BigInt(p.amountSats) });
   if (sel.change > 0) {
-    psbt.addOutput({ address: p.changeAddress, value: sel.change });
+    psbt.addOutput({ address: p.changeAddress, value: BigInt(sel.change) });
   }
 
   return {
