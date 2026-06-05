@@ -17,7 +17,7 @@ export function LedgerIndicator() {
 
   async function handleClick() {
     if (!supported) {
-      toast.error("Browser tidak mendukung Ledger (WebHID)");
+      toast.error("Browser does not support Ledger (WebHID)");
       return;
     }
     setBusy(true);
