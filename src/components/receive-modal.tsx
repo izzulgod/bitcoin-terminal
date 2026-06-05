@@ -72,16 +72,16 @@ export function ReceiveModal({ onClose }: { onClose: () => void }) {
           <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4">
             <div className="flex items-center gap-2 font-semibold text-destructive">
               <ShieldAlert className="h-4 w-4" />
-              Ledger belum terhubung
+              Ledger Not Connected
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Hubungkan Ledger untuk memverifikasi alamat langsung di layar
-              device sebelum digunakan.
+              Connect your Ledger to verify the address directly on the device
+              screen before using it.
             </p>
           </div>
           <button
             onClick={async () => {
-              if (!supported) return toast.error("Browser tidak mendukung WebHID");
+              if (!supported) return toast.error("Browser does not support WebHID");
               try {
                 await connectLedger();
               } catch (e) {
@@ -97,11 +97,10 @@ export function ReceiveModal({ onClose }: { onClose: () => void }) {
             onClick={() => setBypass(true)}
             className="w-full rounded-xl border border-destructive/40 bg-destructive/5 py-3 text-sm font-semibold text-destructive"
           >
-            Lanjutkan tanpa Ledger
+            Continue without Ledger
           </button>
           <p className="text-[11px] text-destructive">
-            ⚠ Kurang aman karena alamat di web app tidak diverifikasi langsung
-            dengan device hardware.
+            ⚠ Less secure: address cannot be verified directly on device hardware.
           </p>
         </div>
       ) : (
