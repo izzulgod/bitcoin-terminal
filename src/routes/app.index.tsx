@@ -187,9 +187,26 @@ function Home() {
       {/* Insight cards */}
       <section className="mt-5 grid grid-cols-2 gap-3">
         <InsightCard
-          icon={<TrendingUp className="h-4 w-4" />}
-          label="BTC Price"
-          value={price.data ? formatFiat(priceVal, currency) : "—"}
+          icon={
+            price.data && price.data.usd_24h_change >= 0 ? (
+              <TrendingUp className="h-4 w-4" />
+            ) : (
+              <TrendingDown className="h-4 w-4" />
+            )
+          }
+          label="24h Change"
+          value={
+            price.data
+              ? `${price.data.usd_24h_change >= 0 ? "+" : ""}${price.data.usd_24h_change.toFixed(2)}%`
+              : "—"
+          }
+          valueClass={
+            price.data
+              ? price.data.usd_24h_change >= 0
+                ? "text-success"
+                : "text-destructive"
+              : undefined
+          }
         />
         <InsightCard
           icon={<Flame className="h-4 w-4" />}
