@@ -45,7 +45,7 @@ export function LedgerIndicator() {
       className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-2 py-1 text-[11px] font-semibold disabled:opacity-50"
       title={
         !supported
-          ? "Browser tidak mendukung WebHID — gunakan Chrome/Edge"
+          ? "Browser does not support WebHID — use Chrome/Edge"
           : info.connected
           ? `Ledger ${info.appVersion ?? ""} connected — click to reconnect`
           : "Click to connect Ledger"
