@@ -293,7 +293,7 @@ function ImportScreen({
           />
           {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
           <div className="mt-4 rounded-xl border border-border bg-card/50 p-3 text-xs text-muted-foreground">
-            xpub tetap di device ini. Kami hanya query block explorer publik.
+            Your xpub stays on this device. We only query public block explorers.
           </div>
           <div className="mt-auto flex gap-2 pt-6">
             <button
