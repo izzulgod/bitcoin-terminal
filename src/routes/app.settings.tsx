@@ -278,6 +278,10 @@ function SettingsScreen() {
           </div>
         </ModalShell>
       )}
+
+      <p className="mt-10 mb-6 text-center text-xs text-muted-foreground">
+        Bitcoin Terminal · v1.0
+      </p>
     </div>
   );
 }
