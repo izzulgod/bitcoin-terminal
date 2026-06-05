@@ -121,7 +121,6 @@ function SettingsScreen() {
             <ExternalLink className="h-3.5 w-3.5" />
           </span>
         </a>
-        <Row label="Bitcoin Terminal" value="v1.0" />
       </Section>
 
       {pinDialog && (
