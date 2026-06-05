@@ -265,8 +265,8 @@ function ImportScreen({
             </button>
           ) : (
             <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
-              Browser tidak mendukung Ledger (WebHID). Gunakan import xpub
-              manual, atau buka di Chrome / Edge / Brave di desktop / Android.
+              Your browser does not support Ledger (WebHID). Use manual xpub
+              import, or open in Chrome / Edge / Brave on desktop / Android.
             </div>
           )}
 
