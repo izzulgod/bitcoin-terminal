@@ -88,7 +88,7 @@ function Analytics() {
   const costBasis = adjustedCostBasisUsd * usdToCurrency;
   const pnl = portfolioValue - costBasis;
   const pnlPct = costBasis > 0 ? (pnl / costBasis) * 100 : 0;
-  const avgPriceDisplay = avgPriceUsd * usdToCurrency;
+  
 
   const athDistance = price.data
     ? ((price.data.usd - ALL_TIME_HIGH_USD) / ALL_TIME_HIGH_USD) * 100
@@ -147,9 +147,10 @@ function Analytics() {
           <div>
             <div className="text-muted-foreground">Avg buy price</div>
             <div className="font-mono">
-              {avgPriceDisplay > 0 ? formatFiat(avgPriceDisplay, currency) : "—"}
+              {avgPriceUsd > 0 ? formatFiat(avgPriceUsd, "USD") : "—"}
             </div>
           </div>
+
           <div>
             <div className="text-muted-foreground">Current price</div>
             <div className="font-mono">
@@ -185,7 +186,7 @@ function Analytics() {
                     <stop offset="100%" stopColor="var(--bitcoin)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <YAxis hide domain={[0, "dataMax"]} />
+              <YAxis hide domain={[0, "dataMax"]} />
                 <Tooltip
                   contentStyle={{
                     background: "var(--card)",
@@ -193,7 +194,10 @@ function Analytics() {
                     borderRadius: 8,
                     fontSize: 12,
                   }}
-                  labelFormatter={(t) => new Date(t as number).toLocaleDateString()}
+                  labelFormatter={(_, payload) => {
+                    const ts = payload?.[0]?.payload?.t as number | undefined;
+                    return ts ? new Date(ts).toLocaleDateString() : "";
+                  }}
                   formatter={(v: number) => [`${v.toFixed(8)} BTC`, "Balance"]}
                 />
                 <Area
@@ -203,6 +207,7 @@ function Analytics() {
                   strokeWidth={2}
                   fill="url(#acc)"
                 />
+
               </AreaChart>
             </ResponsiveContainer>
           ) : (
