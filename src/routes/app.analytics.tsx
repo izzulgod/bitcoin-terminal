@@ -147,9 +147,10 @@ function Analytics() {
           <div>
             <div className="text-muted-foreground">Avg buy price</div>
             <div className="font-mono">
-              {avgPriceDisplay > 0 ? formatFiat(avgPriceDisplay, currency) : "—"}
+              {avgPriceUsd > 0 ? formatFiat(avgPriceUsd, "USD") : "—"}
             </div>
           </div>
+
           <div>
             <div className="text-muted-foreground">Current price</div>
             <div className="font-mono">
