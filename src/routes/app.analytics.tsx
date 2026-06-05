@@ -97,6 +97,10 @@ function Analytics() {
   const pnl = portfolioValue - adjustedCostBasis;
   const pnlPct = adjustedCostBasis > 0 ? (pnl / adjustedCostBasis) * 100 : 0;
 
+  const athDistance = price.data
+    ? ((price.data.usd - ALL_TIME_HIGH_USD) / ALL_TIME_HIGH_USD) * 100
+    : 0;
+
   // Build accumulation timeline from incoming txs (already sorted ascending).
   const timeline = useMemo(() => {
     let acc = 0;
