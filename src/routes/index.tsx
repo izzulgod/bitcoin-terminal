@@ -342,7 +342,7 @@ function DetectScreen({
       <h2 className="text-2xl font-bold">Detected wallet</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         {source === "ledger"
-          ? "xpub diambil dari Ledger."
+          ? "xpub imported from Ledger."
           : "Confirm the script type."}
       </p>
 
