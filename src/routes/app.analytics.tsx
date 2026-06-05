@@ -88,7 +88,7 @@ function Analytics() {
   const costBasis = adjustedCostBasisUsd * usdToCurrency;
   const pnl = portfolioValue - costBasis;
   const pnlPct = costBasis > 0 ? (pnl / costBasis) * 100 : 0;
-  const avgPriceDisplay = avgPriceUsd * usdToCurrency;
+  
 
   const athDistance = price.data
     ? ((price.data.usd - ALL_TIME_HIGH_USD) / ALL_TIME_HIGH_USD) * 100
