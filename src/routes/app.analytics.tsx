@@ -16,9 +16,13 @@ const ALL_TIME_HIGH_USD = 109_000; // updated reference point
 function Analytics() {
   const { data: sync } = useSync();
   const price = usePrice();
-  // CoinGecko free tier caps historical range to 365 days — "max" returns 401.
-  const chart = useMarketChart(365);
   const currency = useAppStore((s) => s.settings.currency);
+  // CoinGecko free tier caps historical range to 365 days — "max" returns 401.
+  // Fetch a USD chart (for the price tooltip baseline) and a currency-specific
+  // chart so cost basis is locked in the user's selected fiat at receive time
+  // — not recomputed via today's live FX.
+  const chartUsd = useMarketChart(365, "usd");
+  const chartCcy = useMarketChart(365, currency);
 
   const owned = useMemo(
     () => new Set((sync?.addresses ?? []).map((a) => a.derived.address)),
@@ -35,11 +39,10 @@ function Analytics() {
     [flows]
   );
 
-  // Historical USD price lookup (binary-search by timestamp ms).
-  const priceAtMs = useMemo(() => {
-    const points = chart.data ?? [];
-    return (ts: number): number | null => {
-      if (!points.length) return null;
+  // Historical price lookup (binary-search by timestamp ms).
+  const makeLookup = (points: { t: number; v: number }[] | undefined) =>
+    (ts: number): number | null => {
+      if (!points || !points.length) return null;
       let lo = 0;
       let hi = points.length - 1;
       while (lo < hi) {
@@ -49,33 +52,39 @@ function Analytics() {
       }
       return points[lo].v;
     };
-  }, [chart.data]);
+  const priceAtMsUsd = useMemo(() => makeLookup(chartUsd.data), [chartUsd.data]);
+  const priceAtMsCcy = useMemo(() => makeLookup(chartCcy.data), [chartCcy.data]);
 
   const priceVal = price.data ? (currency === "USD" ? price.data.usd : price.data.idr) : 0;
-  const usdToCurrency = price.data && price.data.usd > 0 ? priceVal / price.data.usd : 1;
+  const livePriceForFallback = price.data
+    ? currency === "USD"
+      ? price.data.usd
+      : price.data.idr
+    : 0;
 
-  // Compute cost basis in USD using historical price at each receive.
-  // Fallback: if no historical price (chart failed or tx older than 365d),
-  // use current price so PnL still shows something meaningful rather than 0.
-  const { costBasisUsd, acquiredSats, avgPriceUsd, pricedCount, totalReceivedSats } = useMemo(() => {
+  // Compute cost basis directly in the SELECTED CURRENCY using historical price
+  // at each receive's block time. This locks the historical fiat cost — it does
+  // NOT use today's live USD→IDR FX. Avg buy price only changes when a new
+  // receive is added (or when CoinGecko's history backfills).
+  const { costBasis, acquiredSats, avgPrice, pricedCount, totalReceivedSats } = useMemo(() => {
     let cb = 0;
     let acq = 0;
     let priced = 0;
     let received = 0;
-    const fallback = price.data?.usd ?? 0;
     for (const f of incoming) {
       received += f.net;
       const ts = (f.tx.status.block_time as number) * 1000;
-      const p = priceAtMs(ts) ?? (fallback > 0 ? fallback : null);
+      const histCcy = priceAtMsCcy(ts);
+      const p = histCcy ?? (livePriceForFallback > 0 ? livePriceForFallback : null);
       if (p == null) continue;
       const btc = satsToBtc(f.net);
       cb += btc * p;
       acq += f.net;
-      if (priceAtMs(ts) != null) priced++;
+      if (histCcy != null) priced++;
     }
     const avg = acq > 0 ? cb / satsToBtc(acq) : 0;
-    return { costBasisUsd: cb, acquiredSats: acq, avgPriceUsd: avg, pricedCount: priced, totalReceivedSats: received };
-  }, [incoming, priceAtMs, price.data]);
+    return { costBasis: cb, acquiredSats: acq, avgPrice: avg, pricedCount: priced, totalReceivedSats: received };
+  }, [incoming, priceAtMsCcy, livePriceForFallback]);
 
 
   const totalBalanceSats = sync?.totalBalance ?? 0;
@@ -84,15 +93,9 @@ function Analytics() {
 
   // Pro-rata cost basis for currently held sats (handles partial spends).
   const heldRatio = acquiredSats > 0 ? Math.min(1, totalBalanceSats / acquiredSats) : 0;
-  const adjustedCostBasisUsd = costBasisUsd * heldRatio;
-  const costBasis = adjustedCostBasisUsd * usdToCurrency;
-  const pnl = portfolioValue - costBasis;
-  const pnlPct = costBasis > 0 ? (pnl / costBasis) * 100 : 0;
-  
-
-  const athDistance = price.data
-    ? ((price.data.usd - ALL_TIME_HIGH_USD) / ALL_TIME_HIGH_USD) * 100
-    : 0;
+  const adjustedCostBasis = costBasis * heldRatio;
+  const pnl = portfolioValue - adjustedCostBasis;
+  const pnlPct = adjustedCostBasis > 0 ? (pnl / adjustedCostBasis) * 100 : 0;
 
   // Build accumulation timeline from incoming txs (already sorted ascending).
   const timeline = useMemo(() => {
