@@ -276,7 +276,7 @@ function ImportScreen({
             onClick={() => setMode("xpub")}
             className="block w-full text-center text-sm text-muted-foreground underline"
           >
-            Paste xpub manual
+            Paste xpub manually
           </button>
         </div>
       )}
