@@ -264,7 +264,7 @@ export function SendModal({ onClose }: { onClose: () => void }) {
           )}
         </button>
         <p className="text-center text-[10px] text-muted-foreground">
-          Verifikasi seluruh detail di layar device Ledger sebelum konfirmasi.
+          Verify every detail on the Ledger device screen before confirming.
         </p>
       </div>
     </ModalShell>
