@@ -36,10 +36,10 @@ export function usePrice() {
   });
 }
 
-export function useMarketChart(days: number | "max") {
+export function useMarketChart(days: number | "max", vsCurrency: string = "usd") {
   return useQuery<MarketChartPoint[]>({
-    queryKey: ["chart", days],
-    queryFn: () => fetchMarketChart(days),
+    queryKey: ["chart", days, vsCurrency.toLowerCase()],
+    queryFn: () => fetchMarketChart(days, vsCurrency),
     staleTime: 5 * 60_000,
   });
 }
