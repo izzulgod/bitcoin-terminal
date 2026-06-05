@@ -145,7 +145,7 @@ function Analytics() {
         <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
           <div>
             <div className="text-muted-foreground">Cost basis</div>
-            <div className="font-mono">{formatFiat(costBasis, currency)}</div>
+            <div className="font-mono">{formatFiat(adjustedCostBasis, currency)}</div>
           </div>
           <div>
             <div className="text-muted-foreground">Current value</div>
@@ -154,7 +154,7 @@ function Analytics() {
           <div>
             <div className="text-muted-foreground">Avg buy price</div>
             <div className="font-mono">
-              {avgPriceUsd > 0 ? formatFiat(avgPriceUsd, "USD") : "—"}
+              {avgPrice > 0 ? formatFiat(avgPrice, currency) : "—"}
             </div>
           </div>
 
@@ -166,14 +166,15 @@ function Analytics() {
           </div>
         </div>
         <div className="mt-3 text-[10px] text-muted-foreground">
-          {chart.isLoading && incoming.length > 0
+          {chartCcy.isLoading && incoming.length > 0
             ? "Loading historical BTC prices to compute cost basis…"
-            : chart.isError
+            : chartCcy.isError
               ? "Could not load historical BTC prices — PnL unavailable. Retry later."
               : pricedCount < incoming.length && incoming.length > 0
-                ? `Priced ${pricedCount}/${incoming.length} receives using historical BTC/USD; some too recent or missing from history.`
-                : `Cost basis priced per-tx using historical BTC/USD at each receive's block time, converted to ${currency} at the current FX rate. Pro-rated for spent sats.`}
+                ? `Priced ${pricedCount}/${incoming.length} receives using historical BTC/${currency}; some too recent or missing from history.`
+                : `Cost basis priced per-tx using historical BTC/${currency} at each receive's block time (locked at receive time, no live FX). Pro-rated for spent sats.`}
         </div>
+
 
       </section>
 
