@@ -121,7 +121,6 @@ function SettingsScreen() {
             <ExternalLink className="h-3.5 w-3.5" />
           </span>
         </a>
-        <Row label="Bitcoin Terminal" value="v1.0" />
       </Section>
 
       {pinDialog && (
@@ -244,16 +243,16 @@ function SettingsScreen() {
         <ModalShell title="⚠ Danger Zone" onClose={() => setDangerForId(null)}>
           <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3">
             <p className="text-sm font-semibold text-destructive">
-              Hapus wallet terakhir?
+              Remove the last wallet?
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Ini akan menghapus seluruh data wallet dari device ini dan
-              mengembalikan aplikasi ke layar onboarding awal. Aksi ini tidak
-              bisa dibatalkan.
+              This will erase all wallet data from this device and return the
+              app to the initial onboarding screen. This action cannot be
+              undone.
             </p>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            Untuk konfirmasi, ketik <span className="font-mono font-bold text-destructive">DELETE</span>:
+            To confirm, type <span className="font-mono font-bold text-destructive">DELETE</span>:
           </p>
           <input
             value={dangerConfirmText}
@@ -279,6 +278,10 @@ function SettingsScreen() {
           </div>
         </ModalShell>
       )}
+
+      <p className="mt-10 mb-6 text-center text-xs text-muted-foreground">
+        Bitcoin Terminal · v1.0
+      </p>
     </div>
   );
 }

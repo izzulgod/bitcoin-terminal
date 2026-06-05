@@ -265,8 +265,8 @@ function ImportScreen({
             </button>
           ) : (
             <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
-              Browser tidak mendukung Ledger (WebHID). Gunakan import xpub
-              manual, atau buka di Chrome / Edge / Brave di desktop / Android.
+              Your browser does not support Ledger (WebHID). Use manual xpub
+              import, or open in Chrome / Edge / Brave on desktop / Android.
             </div>
           )}
 
@@ -276,7 +276,7 @@ function ImportScreen({
             onClick={() => setMode("xpub")}
             className="block w-full text-center text-sm text-muted-foreground underline"
           >
-            Paste xpub manual
+            Paste xpub manually
           </button>
         </div>
       )}
@@ -293,7 +293,7 @@ function ImportScreen({
           />
           {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
           <div className="mt-4 rounded-xl border border-border bg-card/50 p-3 text-xs text-muted-foreground">
-            xpub tetap di device ini. Kami hanya query block explorer publik.
+            Your xpub stays on this device. We only query public block explorers.
           </div>
           <div className="mt-auto flex gap-2 pt-6">
             <button
@@ -342,7 +342,7 @@ function DetectScreen({
       <h2 className="text-2xl font-bold">Detected wallet</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         {source === "ledger"
-          ? "xpub diambil dari Ledger."
+          ? "xpub imported from Ledger."
           : "Confirm the script type."}
       </p>
 

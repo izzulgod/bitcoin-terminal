@@ -132,15 +132,15 @@ export function SendModal({ onClose }: { onClose: () => void }) {
         <div className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 p-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-destructive">
             <ShieldAlert className="h-4 w-4" />
-            Ledger belum terhubung
+            Ledger Not Connected
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Pengiriman wajib ditandatangani oleh device fisik. Hubungkan Ledger
-            untuk melanjutkan.
+            Transactions must be signed by a hardware device. Connect your
+            Ledger to proceed.
           </p>
           <button
             onClick={async () => {
-              if (!supported) return toast.error("Browser tidak mendukung WebHID");
+              if (!supported) return toast.error("Browser does not support WebHID");
               try { await connectLedger(); } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
             }}
             disabled={!supported}
@@ -264,7 +264,7 @@ export function SendModal({ onClose }: { onClose: () => void }) {
           )}
         </button>
         <p className="text-center text-[10px] text-muted-foreground">
-          Verifikasi seluruh detail di layar device Ledger sebelum konfirmasi.
+          Verify every detail on the Ledger device screen before confirming.
         </p>
       </div>
     </ModalShell>
