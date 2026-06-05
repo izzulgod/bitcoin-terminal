@@ -18,10 +18,8 @@ function Analytics() {
   const price = usePrice();
   const currency = useAppStore((s) => s.settings.currency);
   // CoinGecko free tier caps historical range to 365 days — "max" returns 401.
-  // Fetch a USD chart (for the price tooltip baseline) and a currency-specific
-  // chart so cost basis is locked in the user's selected fiat at receive time
-  // — not recomputed via today's live FX.
-  const chartUsd = useMarketChart(365, "usd");
+  // Fetch a currency-specific chart so cost basis is locked in the user's
+  // selected fiat at receive time — not recomputed via today's live FX.
   const chartCcy = useMarketChart(365, currency);
 
   const owned = useMemo(
@@ -39,10 +37,11 @@ function Analytics() {
     [flows]
   );
 
-  // Historical price lookup (binary-search by timestamp ms).
-  const makeLookup = (points: { t: number; v: number }[] | undefined) =>
-    (ts: number): number | null => {
-      if (!points || !points.length) return null;
+  // Historical price lookup in the selected currency (binary-search by ts ms).
+  const priceAtMsCcy = useMemo(() => {
+    const points = chartCcy.data ?? [];
+    return (ts: number): number | null => {
+      if (!points.length) return null;
       let lo = 0;
       let hi = points.length - 1;
       while (lo < hi) {
@@ -52,8 +51,7 @@ function Analytics() {
       }
       return points[lo].v;
     };
-  const priceAtMsUsd = useMemo(() => makeLookup(chartUsd.data), [chartUsd.data]);
-  const priceAtMsCcy = useMemo(() => makeLookup(chartCcy.data), [chartCcy.data]);
+  }, [chartCcy.data]);
 
   const priceVal = price.data ? (currency === "USD" ? price.data.usd : price.data.idr) : 0;
   const livePriceForFallback = price.data
