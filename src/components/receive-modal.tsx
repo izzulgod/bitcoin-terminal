@@ -149,7 +149,7 @@ export function ReceiveModal({ onClose }: { onClose: () => void }) {
             </button>
           ) : (
             <p className="text-center text-[11px] text-destructive">
-              Alamat ini belum diverifikasi di device — gunakan dengan hati-hati.
+              This address has not been verified on your device — use with caution.
             </p>
           )}
         </div>
