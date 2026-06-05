@@ -251,10 +251,12 @@ function InsightCard({
   icon,
   label,
   value,
+  valueClass,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
+  valueClass?: string;
 }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
@@ -262,7 +264,9 @@ function InsightCard({
         <span className="text-bitcoin">{icon}</span>
         {label}
       </div>
-      <div className="mt-1 font-mono text-sm font-semibold">{value}</div>
+      <div className={`mt-1 font-mono text-sm font-semibold ${valueClass ?? ""}`}>
+        {value}
+      </div>
     </div>
   );
 }
