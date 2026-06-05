@@ -127,9 +127,12 @@ export interface MarketChartPoint {
   t: number;
   v: number;
 }
-export async function fetchMarketChart(days: number | "max"): Promise<MarketChartPoint[]> {
+export async function fetchMarketChart(
+  days: number | "max",
+  vsCurrency: string = "usd"
+): Promise<MarketChartPoint[]> {
   const data = await cgGet<{ prices: [number, number][] }>(
-    `/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`
+    `/coins/bitcoin/market_chart?vs_currency=${vsCurrency.toLowerCase()}&days=${days}`
   );
   return data.prices.map(([t, v]) => ({ t, v }));
 }
