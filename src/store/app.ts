@@ -43,7 +43,7 @@ export const useAppStore = create<State>((set, get) => ({
   wallets: [],
   activeWalletId: null,
   wallet: null,
-  settings: { currency: "USD", pin: null, pinEnabled: false, theme: "dark" },
+  settings: { currency: "USD", pin: null, pinEnabled: false, theme: "dark", language: "en" },
   unlocked: false,
   hydrated: false,
 

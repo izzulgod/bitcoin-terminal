@@ -26,6 +26,7 @@ import { LedgerIndicator } from "@/components/ledger-indicator";
 import { WalletSwitcher } from "@/components/wallet-switcher";
 import { ReceiveModal } from "@/components/receive-modal";
 import { SendModal } from "@/components/send-modal";
+import { consumeChartAnimation } from "@/lib/chart-animation";
 
 export const Route = createFileRoute("/app/")({
   component: Home,
@@ -50,6 +51,7 @@ function Home() {
   const mempool = useMempoolStats();
   const [showSend, setShowSend] = useState(false);
   const [showReceive, setShowReceive] = useState(false);
+  const [animatePriceChart] = useState(() => consumeChartAnimation("price"));
 
   const currency = settings.currency;
   const priceVal = price.data ? (currency === "USD" ? price.data.usd : price.data.idr) : 0;
@@ -173,6 +175,7 @@ function Home() {
                   stroke="var(--bitcoin)"
                   strokeWidth={2}
                   dot={false}
+                  isAnimationActive={animatePriceChart}
                 />
               </LineChart>
             </ResponsiveContainer>

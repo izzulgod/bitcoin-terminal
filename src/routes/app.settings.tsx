@@ -5,19 +5,31 @@ import {
   KeyRound,
   Github,
   ChevronRight,
-  Sun,
-  Moon,
   ExternalLink,
   Wallet as WalletIcon,
   Plus,
   Trash2,
-  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { hashPin } from "@/lib/pin";
 import { ModalShell } from "@/components/receive-modal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { AppLanguage } from "@/lib/wallet-store";
 
 const GITHUB_URL = "https://github.com/izzulgod/bitcoin-terminal";
+
+const LANGUAGES: { value: AppLanguage; label: string }[] = [
+  { value: "en", label: "English" },
+  { value: "id", label: "Bahasa Indonesia" },
+  { value: "ja", label: "日本語 (Japanese)" },
+  { value: "es", label: "Español (Spanish)" },
+];
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsScreen,
@@ -33,7 +45,7 @@ function SettingsScreen() {
   const [manageOpen, setManageOpen] = useState(false);
   const [dangerForId, setDangerForId] = useState<string | null>(null);
   const [dangerConfirmText, setDangerConfirmText] = useState("");
-  const isLight = settings.theme === "light";
+  
 
   function handleRemove(id: string) {
     if (wallets.length === 1) {
@@ -76,24 +88,35 @@ function SettingsScreen() {
       </Section>
 
       <Section title="Preferences">
-        <Row
+        <SelectRow
           label="Currency"
           value={settings.currency}
-          onClick={() =>
-            updateSettings({ currency: settings.currency === "USD" ? "IDR" : "USD" })
-          }
+          onChange={(v) => updateSettings({ currency: v as "USD" | "IDR" })}
+          options={[
+            { value: "USD", label: "USD — US Dollar" },
+            { value: "IDR", label: "IDR — Indonesian Rupiah" },
+          ]}
+        />
+        <SelectRow
+          label="Theme"
+          value={settings.theme}
+          onChange={(v) => updateSettings({ theme: v as "dark" | "light" })}
+          options={[
+            { value: "dark", label: "Dark" },
+            { value: "light", label: "Light" },
+          ]}
+        />
+        <SelectRow
+          label="Language"
+          value={settings.language}
+          onChange={(v) => updateSettings({ language: v as AppLanguage })}
+          options={LANGUAGES.map((l) => ({ value: l.value, label: l.label }))}
         />
         <Row
           label="PIN lock"
           value={settings.pinEnabled ? "Enabled" : "Off"}
           onClick={() => setPinDialog(true)}
           icon={<KeyRound className="h-4 w-4" />}
-        />
-        <Row
-          label="Theme"
-          value={isLight ? "Light" : "Dark"}
-          onClick={() => updateSettings({ theme: isLight ? "dark" : "light" })}
-          icon={isLight ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         />
       </Section>
 
@@ -323,5 +346,35 @@ function Row({
         {onClick && <ChevronRight className="h-4 w-4" />}
       </span>
     </Comp>
+  );
+}
+
+function SelectRow({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <div className="flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-card p-4">
+      <span className="text-sm font-medium">{label}</span>
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger className="h-9 w-auto min-w-[140px] border-border bg-background text-xs font-semibold">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent align="end">
+          {options.map((o) => (
+            <SelectItem key={o.value} value={o.value} className="text-xs">
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }
