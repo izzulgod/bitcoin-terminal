@@ -182,3 +182,15 @@
   .text-success { color: var(--color-success); }
   .text-destructive { color: var(--color-destructive); }
 }
+
+/* Light-mode card elevation — crisp borders + micro-shadows for premium depth */
+html.light .bg-card {
+  box-shadow:
+    0 1px 2px 0 oklch(0.2 0.02 260 / 0.04),
+    0 1px 3px 0 oklch(0.2 0.02 260 / 0.06);
+}
+html.light .bg-card:where(button):hover {
+  box-shadow:
+    0 2px 4px 0 oklch(0.2 0.02 260 / 0.06),
+    0 4px 8px -2px oklch(0.2 0.02 260 / 0.08);
+}
