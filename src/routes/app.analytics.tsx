@@ -234,6 +234,7 @@ function Analytics() {
                   stroke="var(--bitcoin)"
                   strokeWidth={2}
                   fill="url(#acc)"
+                  isAnimationActive={animateAccChart}
                 />
 
               </AreaChart>
