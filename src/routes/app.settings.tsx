@@ -348,3 +348,33 @@ function Row({
     </Comp>
   );
 }
+
+function SelectRow({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <div className="flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-card p-4">
+      <span className="text-sm font-medium">{label}</span>
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger className="h-9 w-auto min-w-[140px] border-border bg-background text-xs font-semibold">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent align="end">
+          {options.map((o) => (
+            <SelectItem key={o.value} value={o.value} className="text-xs">
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
