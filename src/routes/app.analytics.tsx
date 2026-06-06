@@ -184,13 +184,13 @@ function Analytics() {
           </div>
         </div>
         <div className="mt-3 text-[10px] text-muted-foreground">
-          {chartCcy.isLoading && incoming.length > 0
+          {chartIdr.isLoading && incoming.length > 0
             ? "Loading historical BTC prices to compute cost basis…"
-            : chartCcy.isError
+            : chartIdr.isError
               ? "Could not load historical BTC prices — PnL unavailable. Retry later."
               : pricedCount < incoming.length && incoming.length > 0
-                ? `Priced ${pricedCount}/${incoming.length} receives using historical BTC/${currency}; some too recent or missing from history.`
-                : `Cost basis priced per-tx using historical BTC/${currency} at each receive's block time (locked at receive time, no live FX). Pro-rated for spent sats.`}
+                ? `Priced ${pricedCount}/${incoming.length} receives using historical BTC/IDR; some too recent or missing from history.`
+                : `PnL % computed in IDR (your real cash-flow baseline) and stays identical across currency toggle; display values converted via live FX.`}
         </div>
 
 
