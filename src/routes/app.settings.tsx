@@ -45,7 +45,7 @@ function SettingsScreen() {
   const [manageOpen, setManageOpen] = useState(false);
   const [dangerForId, setDangerForId] = useState<string | null>(null);
   const [dangerConfirmText, setDangerConfirmText] = useState("");
-  const isLight = settings.theme === "light";
+  
 
   function handleRemove(id: string) {
     if (wallets.length === 1) {
