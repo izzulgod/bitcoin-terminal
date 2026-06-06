@@ -27,11 +27,14 @@ export interface WalletStoreShape {
   activeWalletId: string | null;
 }
 
+export type AppLanguage = "en" | "id" | "ja" | "es";
+
 export interface Settings {
   currency: "USD" | "IDR";
   pin: string | null;
   pinEnabled: boolean;
   theme: "dark" | "light";
+  language: AppLanguage;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -39,6 +42,7 @@ const DEFAULT_SETTINGS: Settings = {
   pin: null,
   pinEnabled: false,
   theme: "dark",
+  language: "en",
 };
 
 function genId(): string {
