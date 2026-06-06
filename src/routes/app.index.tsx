@@ -51,6 +51,7 @@ function Home() {
   const mempool = useMempoolStats();
   const [showSend, setShowSend] = useState(false);
   const [showReceive, setShowReceive] = useState(false);
+  const [animatePriceChart] = useState(() => consumeChartAnimation("price"));
 
   const currency = settings.currency;
   const priceVal = price.data ? (currency === "USD" ? price.data.usd : price.data.idr) : 0;
