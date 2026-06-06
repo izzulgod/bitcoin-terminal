@@ -18,9 +18,10 @@ function Analytics() {
   const price = usePrice();
   const currency = useAppStore((s) => s.settings.currency);
   // CoinGecko free tier caps historical range to 365 days — "max" returns 401.
-  // Fetch a currency-specific chart so cost basis is locked in the user's
-  // selected fiat at receive time — not recomputed via today's live FX.
-  const chartCcy = useMarketChart(365, currency);
+  // CANONICAL baseline: always fetch IDR chart — user's actual DCA cash flows
+  // were in IDR, so IDR cost basis reflects reality. PnL % is computed from
+  // this baseline and stays IDENTICAL across currency toggles.
+  const chartIdr = useMarketChart(365, "idr");
 
   const owned = useMemo(
     () => new Set((sync?.addresses ?? []).map((a) => a.derived.address)),
@@ -37,9 +38,9 @@ function Analytics() {
     [flows]
   );
 
-  // Historical price lookup in the selected currency (binary-search by ts ms).
-  const priceAtMsCcy = useMemo(() => {
-    const points = chartCcy.data ?? [];
+  // Historical IDR price lookup (binary-search by ts ms).
+  const priceAtMsIdr = useMemo(() => {
+    const points = chartIdr.data ?? [];
     return (ts: number): number | null => {
       if (!points.length) return null;
       let lo = 0;
@@ -51,20 +52,16 @@ function Analytics() {
       }
       return points[lo].v;
     };
-  }, [chartCcy.data]);
+  }, [chartIdr.data]);
 
-  const priceVal = price.data ? (currency === "USD" ? price.data.usd : price.data.idr) : 0;
-  const livePriceForFallback = price.data
-    ? currency === "USD"
-      ? price.data.usd
-      : price.data.idr
-    : 0;
+  const priceUsd = price.data?.usd ?? 0;
+  const priceIdr = price.data?.idr ?? 0;
+  const priceVal = currency === "USD" ? priceUsd : priceIdr;
 
-  // Compute cost basis directly in the SELECTED CURRENCY using historical price
-  // at each receive's block time. This locks the historical fiat cost — it does
-  // NOT use today's live USD→IDR FX. Avg buy price only changes when a new
-  // receive is added (or when CoinGecko's history backfills).
-  const { costBasis, acquiredSats, avgPrice, pricedCount, totalReceivedSats } = useMemo(() => {
+  // Cost basis CANONICAL in IDR using historical BTC/IDR at each receive's block
+  // time. This locks the real cash flow. PnL ratio is derived from this and is
+  // currency-invariant; display values in USD are converted from this baseline.
+  const { costBasisIdr, acquiredSats, pricedCount, totalReceivedSats } = useMemo(() => {
     let cb = 0;
     let acq = 0;
     let priced = 0;
@@ -72,28 +69,51 @@ function Analytics() {
     for (const f of incoming) {
       received += f.net;
       const ts = (f.tx.status.block_time as number) * 1000;
-      const histCcy = priceAtMsCcy(ts);
-      const p = histCcy ?? (livePriceForFallback > 0 ? livePriceForFallback : null);
+      const histIdr = priceAtMsIdr(ts);
+      const p = histIdr ?? (priceIdr > 0 ? priceIdr : null);
       if (p == null) continue;
       const btc = satsToBtc(f.net);
       cb += btc * p;
       acq += f.net;
-      if (histCcy != null) priced++;
+      if (histIdr != null) priced++;
     }
-    const avg = acq > 0 ? cb / satsToBtc(acq) : 0;
-    return { costBasis: cb, acquiredSats: acq, avgPrice: avg, pricedCount: priced, totalReceivedSats: received };
-  }, [incoming, priceAtMsCcy, livePriceForFallback]);
+    return { costBasisIdr: cb, acquiredSats: acq, pricedCount: priced, totalReceivedSats: received };
+  }, [incoming, priceAtMsIdr, priceIdr]);
 
 
   const totalBalanceSats = sync?.totalBalance ?? 0;
   const totalBtc = satsToBtc(totalBalanceSats);
   const portfolioValue = totalBtc * priceVal;
+  const portfolioValueIdr = totalBtc * priceIdr;
 
   // Pro-rata cost basis for currently held sats (handles partial spends).
   const heldRatio = acquiredSats > 0 ? Math.min(1, totalBalanceSats / acquiredSats) : 0;
-  const adjustedCostBasis = costBasis * heldRatio;
+  const adjustedCostBasisIdr = costBasisIdr * heldRatio;
+
+  // CANONICAL PnL ratio — computed in IDR (user's real cash-flow currency).
+  // This ratio is invariant under currency toggle.
+  const pnlRatio =
+    adjustedCostBasisIdr > 0
+      ? (portfolioValueIdr - adjustedCostBasisIdr) / adjustedCostBasisIdr
+      : 0;
+  const pnlPct = pnlRatio * 100;
+
+  // Display cost basis: derive from current portfolio value & canonical ratio so
+  // the % stays identical across USD/IDR. Falls back to direct FX conversion
+  // when ratio is undefined (no acquisitions yet).
+  const fxFromIdr = priceIdr > 0 ? priceVal / priceIdr : 0;
+  const adjustedCostBasis =
+    adjustedCostBasisIdr > 0 && pnlRatio !== -1
+      ? portfolioValue / (1 + pnlRatio)
+      : adjustedCostBasisIdr * fxFromIdr;
   const pnl = portfolioValue - adjustedCostBasis;
-  const pnlPct = adjustedCostBasis > 0 ? (pnl / adjustedCostBasis) * 100 : 0;
+
+  // Avg buy price in display currency: full (un-pro-rated) cost basis ÷ acquired BTC.
+  const costBasisFullDisplay =
+    acquiredSats > 0 && heldRatio > 0
+      ? adjustedCostBasis / heldRatio
+      : costBasisIdr * fxFromIdr;
+  const avgPrice = acquiredSats > 0 ? costBasisFullDisplay / satsToBtc(acquiredSats) : 0;
 
   const athDistance = price.data
     ? ((price.data.usd - ALL_TIME_HIGH_USD) / ALL_TIME_HIGH_USD) * 100
