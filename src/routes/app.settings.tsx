@@ -5,19 +5,31 @@ import {
   KeyRound,
   Github,
   ChevronRight,
-  Sun,
-  Moon,
   ExternalLink,
   Wallet as WalletIcon,
   Plus,
   Trash2,
-  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { hashPin } from "@/lib/pin";
 import { ModalShell } from "@/components/receive-modal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { AppLanguage } from "@/lib/wallet-store";
 
 const GITHUB_URL = "https://github.com/izzulgod/bitcoin-terminal";
+
+const LANGUAGES: { value: AppLanguage; label: string }[] = [
+  { value: "en", label: "English" },
+  { value: "id", label: "Bahasa Indonesia" },
+  { value: "ja", label: "日本語 (Japanese)" },
+  { value: "es", label: "Español (Spanish)" },
+];
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsScreen,
