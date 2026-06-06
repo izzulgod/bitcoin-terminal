@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Award, TrendingUp, Sparkles } from "lucide-react";
 import { useMarketChart, usePrice, useSync } from "@/hooks/use-bitcoin-data";
 import { useAppStore } from "@/store/app";
 import { classifyTxs } from "@/lib/sync-engine";
 import { formatBtc, formatFiat, satsToBtc, timeAgo } from "@/lib/format";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, YAxis } from "recharts";
+import { consumeChartAnimation } from "@/lib/chart-animation";
 
 export const Route = createFileRoute("/app/analytics")({
   component: Analytics,
