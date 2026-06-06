@@ -18,6 +18,7 @@ function Analytics() {
   const { data: sync } = useSync();
   const price = usePrice();
   const currency = useAppStore((s) => s.settings.currency);
+  const [animateAccChart] = useState(() => consumeChartAnimation("accumulation"));
   // CoinGecko free tier caps historical range to 365 days — "max" returns 401.
   // CANONICAL baseline: always fetch IDR chart — user's actual DCA cash flows
   // were in IDR, so IDR cost basis reflects reality. PnL % is computed from
