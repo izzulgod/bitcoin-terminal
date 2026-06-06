@@ -175,6 +175,7 @@ function Home() {
                   stroke="var(--bitcoin)"
                   strokeWidth={2}
                   dot={false}
+                  isAnimationActive={animatePriceChart}
                 />
               </LineChart>
             </ResponsiveContainer>
