@@ -172,6 +172,7 @@ function Landing() {
 }
 
 function Intro({ onNext, addMode }: { onNext: () => void; addMode: boolean }) {
+  const t = useT();
   return (
     <div
       className="mx-auto flex min-h-[100dvh] max-w-md flex-col px-6 py-8"
@@ -183,31 +184,31 @@ function Intro({ onNext, addMode }: { onNext: () => void; addMode: boolean }) {
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold leading-tight tracking-tight">
           {addMode ? (
-            <>Add another <span className="text-bitcoin">wallet.</span></>
+            <>{t("intro.addAnother")}</>
           ) : (
             <>
-              Your Bitcoin.
+              {t("intro.title.line1")}
               <br />
-              <span className="text-bitcoin">Fully private.</span>
+              <span className="text-bitcoin">{t("intro.title.line2")}</span>
               <br />
-              Fully visible.
+              {t("intro.title.line3")}
             </>
           )}
         </h1>
         <p className="mt-4 text-sm sm:text-base text-muted-foreground">
-          Connect a Ledger or paste an xpub. Your keys never leave the device.
+          {t("intro.subtitle")}
         </p>
         <div className="mt-8 grid w-full grid-cols-3 gap-3 text-xs">
-          <Feature icon={Usb} label="Ledger" />
-          <Feature icon={ShieldCheck} label="No keys" />
-          <Feature icon={Activity} label="Real-time" />
+          <Feature icon={Usb} label={t("intro.feat.ledger")} />
+          <Feature icon={ShieldCheck} label={t("intro.feat.noKeys")} />
+          <Feature icon={Activity} label={t("intro.feat.realtime")} />
         </div>
       </div>
       <button
         onClick={onNext}
         className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-bitcoin py-4 text-base font-semibold text-primary-foreground transition-all hover:opacity-95 active:scale-[0.99]"
       >
-        {addMode ? "Add wallet" : "Get started"} <ArrowRight className="h-5 w-5" />
+        {addMode ? t("intro.cta.add") : t("intro.cta.start")} <ArrowRight className="h-5 w-5" />
       </button>
     </div>
   );
