@@ -176,22 +176,22 @@ function Analytics() {
         </div>
         <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
           <div>
-            <div className="text-muted-foreground">Cost basis</div>
+            <div className="text-muted-foreground">{t("analytics.costBasis")}</div>
             <div className="font-mono">{formatFiat(adjustedCostBasis, currency)}</div>
           </div>
           <div>
-            <div className="text-muted-foreground">Current value</div>
+            <div className="text-muted-foreground">{t("analytics.currentValue")}</div>
             <div className="font-mono">{formatFiat(portfolioValue, currency)}</div>
           </div>
           <div>
-            <div className="text-muted-foreground">Avg buy price</div>
+            <div className="text-muted-foreground">{t("analytics.avgBuyPrice")}</div>
             <div className="font-mono">
               {avgPrice > 0 ? formatFiat(avgPrice, currency) : "—"}
             </div>
           </div>
 
           <div>
-            <div className="text-muted-foreground">Current price</div>
+            <div className="text-muted-foreground">{t("analytics.currentPrice")}</div>
             <div className="font-mono">
               {priceVal > 0 ? formatFiat(priceVal, currency) : "—"}
             </div>
