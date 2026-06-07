@@ -1,17 +1,19 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Wallet, BarChart3, Activity, Settings as SettingsIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 const items = [
-  { to: "/app", label: "Home", icon: Home },
-  { to: "/app/wallet", label: "Wallet", icon: Wallet },
-  { to: "/app/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/app/mempool", label: "Mempool", icon: Activity },
-  { to: "/app/settings", label: "Settings", icon: SettingsIcon },
+  { to: "/app", key: "nav.home", icon: Home },
+  { to: "/app/wallet", key: "nav.wallet", icon: Wallet },
+  { to: "/app/analytics", key: "nav.analytics", icon: BarChart3 },
+  { to: "/app/mempool", key: "nav.mempool", icon: Activity },
+  { to: "/app/settings", key: "nav.settings", icon: SettingsIcon },
 ] as const;
 
 export function BottomNav() {
   const path = useRouterState({ select: (r) => r.location.pathname });
+  const t = useT();
   return (
     <nav
       aria-label="Primary"
@@ -19,7 +21,7 @@ export function BottomNav() {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="mx-auto flex w-full max-w-2xl px-1">
-        {items.map(({ to, label, icon: Icon }) => {
+        {items.map(({ to, key, icon: Icon }) => {
           const active = to === "/app" ? path === "/app" : path.startsWith(to);
           return (
             <li key={to} className="min-w-0 flex-1">
@@ -31,7 +33,7 @@ export function BottomNav() {
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" strokeWidth={active ? 2.5 : 2} />
-                <span className="truncate max-w-full">{label}</span>
+                <span className="truncate max-w-full">{t(key)}</span>
               </Link>
             </li>
           );
