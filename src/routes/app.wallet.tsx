@@ -30,15 +30,22 @@ export const Route = createFileRoute("/app/wallet")({
   component: WalletScreen,
 });
 
-const TABS = ["Overview", "Addresses", "UTXOs", "Derivation"] as const;
+const TAB_KEYS = [
+  { key: "Overview", label: "wallet.tab.overview" },
+  { key: "Addresses", label: "wallet.tab.addresses" },
+  { key: "UTXOs", label: "wallet.tab.utxos" },
+  { key: "Derivation", label: "wallet.tab.derivation" },
+] as const;
+type TabKey = (typeof TAB_KEYS)[number]["key"];
 
 function WalletScreen() {
+  const t = useT();
   const { data: sync } = useSync();
   const wallet = useAppStore((s) => s.wallet);
   const renameWallet = useAppStore((s) => s.renameWallet);
   const settings = useAppStore((s) => s.settings);
   const price = usePrice();
-  const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
+  const [tab, setTab] = useState<TabKey>("Overview");
   const [showUnused, setShowUnused] = useState(false);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
@@ -54,39 +61,44 @@ function WalletScreen() {
     if (!sync) return [];
     const owned = new Set(sync.addresses.map((a) => a.derived.address));
     const tipHeight =
-      sync.txs.find((t) => t.status.confirmed && t.status.block_height)?.status
+      sync.txs.find((tx) => tx.status.confirmed && tx.status.block_height)?.status
         .block_height ?? 0;
     return classifyTxs(sync.txs, owned, tipHeight + 6);
   }, [sync]);
 
   function saveName() {
-    const t = draft.trim();
-    if (!t) return toast.error("Name cannot be empty");
-    renameWallet(t);
+    const txt = draft.trim();
+    if (!txt) return toast.error("Name cannot be empty");
+    renameWallet(txt);
     setEditing(false);
     toast.success("Wallet renamed");
   }
 
+  // Masked xpub for the debit-card micro-detail row.
+  const maskedXpub = wallet
+    ? `${wallet.normalizedXpub.slice(0, 6)} •••• ${wallet.normalizedXpub.slice(-6)}`
+    : "—";
+
   return (
     <div className="px-5 pt-6">
       <header>
-        <h1 className="text-2xl font-bold">Wallet</h1>
-        <p className="mt-1 text-xs text-muted-foreground">{wallet?.derivationLabel}</p>
+        <h1 className="text-2xl font-bold">{t("wallet.title")}</h1>
       </header>
 
       <div className="mt-5 flex gap-1 rounded-xl bg-card p-1 overflow-x-auto">
-        {TABS.map((t) => (
+        {TAB_KEYS.map((tk) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tk.key}
+            onClick={() => setTab(tk.key)}
             className={`flex-1 whitespace-nowrap rounded-lg px-2 py-2 text-xs font-semibold transition-colors ${
-              tab === t ? "bg-bitcoin text-primary-foreground" : "text-muted-foreground"
+              tab === tk.key ? "bg-bitcoin text-primary-foreground" : "text-muted-foreground"
             }`}
           >
-            {t}
+            {t(tk.label)}
           </button>
         ))}
       </div>
+
 
       {tab === "Overview" && (
         <>
