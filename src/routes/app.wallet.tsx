@@ -102,88 +102,133 @@ function WalletScreen() {
 
       {tab === "Overview" && (
         <>
-          <div className="mt-4 rounded-2xl border border-border bg-card p-4">
-            <div className="flex items-center gap-2">
-              {editing ? (
-                <>
-                  <input
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    maxLength={40}
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") saveName();
-                      if (e.key === "Escape") setEditing(false);
-                    }}
-                    className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm"
-                  />
-                  <button
-                    onClick={saveName}
-                    className="rounded-md bg-bitcoin p-1 text-primary-foreground"
-                  >
-                    <Check className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setEditing(false)}
-                    className="rounded-md border border-border bg-background p-1"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-base font-semibold">
-                      {wallet?.label ?? "Wallet"}
-                    </div>
+          {/* Wallet name + rename */}
+          <div className="mt-4 flex items-center gap-2">
+            {editing ? (
+              <>
+                <input
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  maxLength={40}
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") saveName();
+                    if (e.key === "Escape") setEditing(false);
+                  }}
+                  className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm"
+                />
+                <button
+                  onClick={saveName}
+                  className="rounded-md bg-bitcoin p-1 text-primary-foreground"
+                >
+                  <Check className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setEditing(false)}
+                  className="rounded-md border border-border bg-background p-1"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-base font-semibold">
+                    {wallet?.label ?? "Wallet"}
                   </div>
-                  <button
-                    onClick={() => {
-                      setDraft(wallet?.label ?? "");
-                      setEditing(true);
-                    }}
-                    className="rounded-md border border-border bg-background p-1.5 text-muted-foreground"
-                    aria-label="Rename"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </button>
-                </>
-              )}
-            </div>
-            <div className="mt-3 inline-flex items-center gap-1 rounded-md bg-bitcoin/10 px-2 py-0.5 text-[11px] font-semibold text-bitcoin">
-              {wallet?.derivationLabel}
-            </div>
-            <div className="mt-3">
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Total balance
+                </div>
+                <button
+                  onClick={() => {
+                    setDraft(wallet?.label ?? "");
+                    setEditing(true);
+                  }}
+                  className="rounded-md border border-border bg-background p-1.5 text-muted-foreground"
+                  aria-label="Rename"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Premium debit-card composition */}
+          <div
+            className="relative mt-3 overflow-hidden rounded-2xl border border-bitcoin/20 p-5 text-primary-foreground shadow-lg"
+            style={{
+              background:
+                "linear-gradient(135deg, oklch(0.32 0.07 60) 0%, oklch(0.22 0.05 50) 55%, oklch(0.14 0.02 40) 100%)",
+            }}
+          >
+            {/* Decorative glow */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full"
+              style={{ background: "radial-gradient(circle, oklch(0.78 0.17 60 / 0.35), transparent 70%)" }}
+            />
+
+            {/* Top row */}
+            <div className="relative flex items-start justify-between gap-3">
+              <div className="rounded-xl bg-white/10 p-2 backdrop-blur-sm">
+                <Bitcoin className="h-5 w-5 text-bitcoin" />
               </div>
-              <div className="font-mono text-2xl font-bold">
-                {formatBtc(sync?.totalBalance ?? 0)} BTC
+              <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white/90 backdrop-blur-sm">
+                Native SegWit • BIP84
+              </span>
+            </div>
+
+            {/* Center */}
+            <div className="relative mt-7">
+              <div className="text-[10px] uppercase tracking-[0.18em] text-white/60">
+                {t("wallet.totalBalance")}
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="mt-1 flex items-baseline gap-2">
+                <span className="font-mono text-3xl font-extrabold tracking-tight text-white">
+                  {formatBtc(sync?.totalBalance ?? 0)}
+                </span>
+                <span className="text-sm font-semibold text-white/70">BTC</span>
+              </div>
+              <div className="mt-1 font-mono text-sm text-white/80">
                 {price.data ? formatFiat(fiatVal, currency) : "—"}
               </div>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setShowSend(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background py-2.5 text-sm font-semibold"
-              >
-                <ArrowUpRight className="h-4 w-4" /> Send
-              </button>
-              <button
-                onClick={() => setShowReceive(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-bitcoin py-2.5 text-sm font-semibold text-primary-foreground"
-              >
-                <ArrowDownLeft className="h-4 w-4" /> Receive
-              </button>
+
+            {/* Lower row — masked xpub + network */}
+            <div className="relative mt-6 flex items-end justify-between gap-2">
+              <div>
+                <div className="text-[9px] uppercase tracking-[0.18em] text-white/50">xpub</div>
+                <div className="font-mono text-[11px] text-white/80">{maskedXpub}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-[9px] uppercase tracking-[0.18em] text-white/50">
+                  {t("wallet.network")}
+                </div>
+                <div className="text-[11px] font-semibold text-white/90">
+                  {wallet?.network === "mainnet" ? "Mainnet" : "Testnet"}
+                </div>
+              </div>
             </div>
+          </div>
+
+          {/* Send / Receive */}
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setShowSend(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card py-2.5 text-sm font-semibold"
+            >
+              <ArrowUpRight className="h-4 w-4" /> {t("common.send")}
+            </button>
+            <button
+              onClick={() => setShowReceive(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-bitcoin py-2.5 text-sm font-semibold text-primary-foreground"
+            >
+              <ArrowDownLeft className="h-4 w-4" /> {t("common.receive")}
+            </button>
           </div>
 
           <section className="mt-5">
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Recent activity</h3>
-              <span className="text-xs text-muted-foreground">{txFlows.length} txs</span>
+              <h3 className="text-sm font-semibold">{t("wallet.recent")}</h3>
+              <span className="text-xs text-muted-foreground">{txFlows.length} {t("wallet.txs")}</span>
             </div>
             <div className="space-y-2">
               {txFlows.slice(0, 8).map((flow) => (
@@ -191,13 +236,14 @@ function WalletScreen() {
               ))}
               {txFlows.length === 0 && (
                 <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                  No transactions yet.
+                  {t("wallet.noTxs")}
                 </div>
               )}
             </div>
           </section>
         </>
       )}
+
 
       {tab === "Addresses" && (
         <div className="mt-4 space-y-2">
