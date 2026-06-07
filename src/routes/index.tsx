@@ -422,30 +422,31 @@ function SecurityScreen({
   onConfirm: () => void;
   showPinSection: boolean;
 }) {
+  const t = useT();
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-10">
-      <h2 className="text-2xl font-bold">Name {showPinSection ? "& lock" : "wallet"}</h2>
+      <h2 className="text-2xl font-bold">{showPinSection ? t("security.title.lock") : t("security.title.name")}</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Give this wallet a label{showPinSection ? ", then optionally set a 6-digit PIN." : "."}
+        {showPinSection ? t("security.sub.lock") : t("security.sub.name")}
       </p>
 
       <div className="mt-6 rounded-xl border border-border bg-card p-4">
         <label className="text-xs uppercase tracking-wider text-muted-foreground">
-          Wallet name
+          {t("security.walletName")}
         </label>
         <input
           type="text"
           value={walletLabel}
           onChange={(e) => setWalletLabel(e.target.value)}
           maxLength={40}
-          placeholder="e.g. Ledger, Cold Stack, Savings"
+          placeholder={t("security.walletNamePlaceholder")}
           className="mt-2 w-full rounded-lg border border-border bg-background p-3 text-sm focus:border-bitcoin focus:outline-none"
         />
         {error && /wallet name/i.test(error) ? (
           <p className="mt-2 text-sm text-destructive">{error}</p>
         ) : (
           <p className="mt-1 text-[11px] text-muted-foreground">
-            You can rename it anytime from the Wallet tab.
+            {t("security.renameHint")}
           </p>
         )}
       </div>
@@ -454,8 +455,8 @@ function SecurityScreen({
         <>
           <label className="mt-4 flex items-center justify-between rounded-xl border border-border bg-card p-4">
             <div>
-              <div className="font-semibold">Enable PIN</div>
-              <div className="text-xs text-muted-foreground">Required on app open</div>
+              <div className="font-semibold">{t("security.enablePin")}</div>
+              <div className="text-xs text-muted-foreground">{t("security.pinHint")}</div>
             </div>
             <input
               type="checkbox"
@@ -473,7 +474,7 @@ function SecurityScreen({
                 maxLength={6}
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-                placeholder="6-digit PIN"
+                placeholder={t("security.pinPlaceholder")}
                 className="w-full rounded-xl border border-border bg-card p-4 text-center font-mono text-xl tracking-[0.5em] focus:border-bitcoin focus:outline-none"
               />
               <input
@@ -482,7 +483,7 @@ function SecurityScreen({
                 maxLength={6}
                 value={pinConfirm}
                 onChange={(e) => setPinConfirm(e.target.value.replace(/\D/g, ""))}
-                placeholder="Confirm PIN"
+                placeholder={t("security.pinConfirm")}
                 className="w-full rounded-xl border border-border bg-card p-4 text-center font-mono text-xl tracking-[0.5em] focus:border-bitcoin focus:outline-none"
               />
             </div>
@@ -498,7 +499,7 @@ function SecurityScreen({
         onClick={onConfirm}
         className="mt-auto rounded-xl bg-bitcoin py-4 font-semibold text-primary-foreground"
       >
-        Finish setup
+        {t("security.confirm")}
       </button>
     </div>
   );
