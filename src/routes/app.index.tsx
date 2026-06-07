@@ -94,7 +94,7 @@ function Home() {
       {/* Portfolio header */}
       <section className="mt-7">
         <div className="text-xs uppercase tracking-wider text-muted-foreground">
-          Total balance
+          {t("home.totalBalance")}
         </div>
         <div className="mt-1 flex items-baseline gap-2">
           <div className="font-mono text-4xl font-bold tracking-tight">
@@ -115,13 +115,13 @@ function Home() {
             onClick={() => setShowSend(true)}
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 text-sm font-semibold"
           >
-            <ArrowUpRight className="h-4 w-4" /> Send
+            <ArrowUpRight className="h-4 w-4" /> {t("common.send")}
           </button>
           <button
             onClick={() => setShowReceive(true)}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-bitcoin py-3 text-sm font-semibold text-primary-foreground"
           >
-            <ArrowDownLeft className="h-4 w-4" /> Receive
+            <ArrowDownLeft className="h-4 w-4" /> {t("common.receive")}
           </button>
         </div>
       </section>
