@@ -61,16 +61,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "theme-color", content: "#0a0a0f" },
-      { title: "Bitcoin Terminal — Watch-only xpub Dashboard" },
+      { title: "Bitcoin Terminal — Secure & Private Bitcoin Wallet" },
       {
         name: "description",
         content:
-          "Bloomberg Terminal for personal Bitcoin. Monitor your xpub balance, UTXOs, transactions, and mempool — fully private, watch-only.",
+          "Bitcoin Terminal - A secure, private, and fully functional Bitcoin wallet.",
       },
+      { name: "application-name", content: "Bitcoin Terminal" },
+      { property: "og:site_name", content: "Bitcoin Terminal" },
       { property: "og:title", content: "Bitcoin Terminal" },
-      { property: "og:description", content: "Watch-only Bitcoin dashboard powered by your xpub." },
+      {
+        property: "og:description",
+        content:
+          "Bitcoin Terminal - A secure, private, and fully functional Bitcoin wallet.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Bitcoin Terminal" },
+      {
+        name: "twitter:description",
+        content:
+          "Bitcoin Terminal - A secure, private, and fully functional Bitcoin wallet.",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
