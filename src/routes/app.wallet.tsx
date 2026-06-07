@@ -18,11 +18,13 @@ import {
   X,
   ArrowDownLeft,
   ArrowUpRight,
+  Bitcoin,
 } from "lucide-react";
 import { toast } from "sonner";
 import { classifyTxs } from "@/lib/sync-engine";
 import { SendModal } from "@/components/send-modal";
 import { ReceiveModal } from "@/components/receive-modal";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/wallet")({
   component: WalletScreen,
