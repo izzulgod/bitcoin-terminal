@@ -137,6 +137,24 @@ export async function fetchMarketChart(
   return data.prices.map(([t, v]) => ({ t, v }));
 }
 
+export interface AthData {
+  usd: number;
+  idr: number;
+}
+export async function fetchAth(): Promise<AthData> {
+  const data = await cgGet<{
+    market_data: { ath: Record<string, number> };
+  }>(
+    "/coins/bitcoin?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false"
+  );
+  return {
+    usd: data.market_data.ath.usd,
+    idr: data.market_data.ath.idr,
+  };
+}
+
+
+
 export async function fetchFearGreed(): Promise<{ value: number; classification: string }> {
   const res = await fetch("https://api.alternative.me/fng/?limit=1");
   if (!res.ok) throw new Error("fng fetch failed");

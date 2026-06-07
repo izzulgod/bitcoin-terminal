@@ -4,6 +4,7 @@ const BASE = "https://api.coingecko.com/api/v3";
 const ALLOWED_PATHS = [
   /^\/simple\/price(\?.*)?$/,
   /^\/coins\/bitcoin\/market_chart(\?.*)?$/,
+  /^\/coins\/bitcoin(\?.*)?$/,
 ];
 
 export const Route = createFileRoute("/api/public/coingecko")({

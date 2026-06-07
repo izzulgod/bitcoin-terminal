@@ -18,25 +18,34 @@ import {
   X,
   ArrowDownLeft,
   ArrowUpRight,
+  Bitcoin,
 } from "lucide-react";
 import { toast } from "sonner";
 import { classifyTxs } from "@/lib/sync-engine";
 import { SendModal } from "@/components/send-modal";
 import { ReceiveModal } from "@/components/receive-modal";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/wallet")({
   component: WalletScreen,
 });
 
-const TABS = ["Overview", "Addresses", "UTXOs", "Derivation"] as const;
+const TAB_KEYS = [
+  { key: "Overview", label: "wallet.tab.overview" },
+  { key: "Addresses", label: "wallet.tab.addresses" },
+  { key: "UTXOs", label: "wallet.tab.utxos" },
+  { key: "Derivation", label: "wallet.tab.derivation" },
+] as const;
+type TabKey = (typeof TAB_KEYS)[number]["key"];
 
 function WalletScreen() {
+  const t = useT();
   const { data: sync } = useSync();
   const wallet = useAppStore((s) => s.wallet);
   const renameWallet = useAppStore((s) => s.renameWallet);
   const settings = useAppStore((s) => s.settings);
   const price = usePrice();
-  const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
+  const [tab, setTab] = useState<TabKey>("Overview");
   const [showUnused, setShowUnused] = useState(false);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
@@ -52,124 +61,174 @@ function WalletScreen() {
     if (!sync) return [];
     const owned = new Set(sync.addresses.map((a) => a.derived.address));
     const tipHeight =
-      sync.txs.find((t) => t.status.confirmed && t.status.block_height)?.status
+      sync.txs.find((tx) => tx.status.confirmed && tx.status.block_height)?.status
         .block_height ?? 0;
     return classifyTxs(sync.txs, owned, tipHeight + 6);
   }, [sync]);
 
   function saveName() {
-    const t = draft.trim();
-    if (!t) return toast.error("Name cannot be empty");
-    renameWallet(t);
+    const txt = draft.trim();
+    if (!txt) return toast.error("Name cannot be empty");
+    renameWallet(txt);
     setEditing(false);
     toast.success("Wallet renamed");
   }
 
+  // Masked xpub for the debit-card micro-detail row.
+  const maskedXpub = wallet
+    ? `${wallet.normalizedXpub.slice(0, 6)} •••• ${wallet.normalizedXpub.slice(-6)}`
+    : "—";
+
   return (
     <div className="px-5 pt-6">
       <header>
-        <h1 className="text-2xl font-bold">Wallet</h1>
-        <p className="mt-1 text-xs text-muted-foreground">{wallet?.derivationLabel}</p>
+        <h1 className="text-2xl font-bold">{t("wallet.title")}</h1>
       </header>
 
       <div className="mt-5 flex gap-1 rounded-xl bg-card p-1 overflow-x-auto">
-        {TABS.map((t) => (
+        {TAB_KEYS.map((tk) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tk.key}
+            onClick={() => setTab(tk.key)}
             className={`flex-1 whitespace-nowrap rounded-lg px-2 py-2 text-xs font-semibold transition-colors ${
-              tab === t ? "bg-bitcoin text-primary-foreground" : "text-muted-foreground"
+              tab === tk.key ? "bg-bitcoin text-primary-foreground" : "text-muted-foreground"
             }`}
           >
-            {t}
+            {t(tk.label)}
           </button>
         ))}
       </div>
 
+
       {tab === "Overview" && (
         <>
-          <div className="mt-4 rounded-2xl border border-border bg-card p-4">
-            <div className="flex items-center gap-2">
-              {editing ? (
-                <>
-                  <input
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    maxLength={40}
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") saveName();
-                      if (e.key === "Escape") setEditing(false);
-                    }}
-                    className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm"
-                  />
-                  <button
-                    onClick={saveName}
-                    className="rounded-md bg-bitcoin p-1 text-primary-foreground"
-                  >
-                    <Check className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setEditing(false)}
-                    className="rounded-md border border-border bg-background p-1"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-base font-semibold">
-                      {wallet?.label ?? "Wallet"}
-                    </div>
+          {/* Wallet name + rename */}
+          <div className="mt-4 flex items-center gap-2">
+            {editing ? (
+              <>
+                <input
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  maxLength={40}
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") saveName();
+                    if (e.key === "Escape") setEditing(false);
+                  }}
+                  className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm"
+                />
+                <button
+                  onClick={saveName}
+                  className="rounded-md bg-bitcoin p-1 text-primary-foreground"
+                >
+                  <Check className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setEditing(false)}
+                  className="rounded-md border border-border bg-background p-1"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-base font-semibold">
+                    {wallet?.label ?? "Wallet"}
                   </div>
-                  <button
-                    onClick={() => {
-                      setDraft(wallet?.label ?? "");
-                      setEditing(true);
-                    }}
-                    className="rounded-md border border-border bg-background p-1.5 text-muted-foreground"
-                    aria-label="Rename"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </button>
-                </>
-              )}
-            </div>
-            <div className="mt-3 inline-flex items-center gap-1 rounded-md bg-bitcoin/10 px-2 py-0.5 text-[11px] font-semibold text-bitcoin">
-              {wallet?.derivationLabel}
-            </div>
-            <div className="mt-3">
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Total balance
+                </div>
+                <button
+                  onClick={() => {
+                    setDraft(wallet?.label ?? "");
+                    setEditing(true);
+                  }}
+                  className="rounded-md border border-border bg-background p-1.5 text-muted-foreground"
+                  aria-label="Rename"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Premium debit-card composition */}
+          <div
+            className="relative mt-3 overflow-hidden rounded-2xl border border-bitcoin/20 p-5 text-primary-foreground shadow-lg"
+            style={{
+              background:
+                "linear-gradient(135deg, oklch(0.32 0.07 60) 0%, oklch(0.22 0.05 50) 55%, oklch(0.14 0.02 40) 100%)",
+            }}
+          >
+            {/* Decorative glow */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full"
+              style={{ background: "radial-gradient(circle, oklch(0.78 0.17 60 / 0.35), transparent 70%)" }}
+            />
+
+            {/* Top row */}
+            <div className="relative flex items-start justify-between gap-3">
+              <div className="rounded-xl bg-white/10 p-2 backdrop-blur-sm">
+                <Bitcoin className="h-5 w-5 text-bitcoin" />
               </div>
-              <div className="font-mono text-2xl font-bold">
-                {formatBtc(sync?.totalBalance ?? 0)} BTC
+              <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white/90 backdrop-blur-sm">
+                Native SegWit • BIP84
+              </span>
+            </div>
+
+            {/* Center */}
+            <div className="relative mt-7">
+              <div className="text-[10px] uppercase tracking-[0.18em] text-white/60">
+                {t("wallet.totalBalance")}
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="mt-1 flex items-baseline gap-2">
+                <span className="font-mono text-3xl font-extrabold tracking-tight text-white">
+                  {formatBtc(sync?.totalBalance ?? 0)}
+                </span>
+                <span className="text-sm font-semibold text-white/70">BTC</span>
+              </div>
+              <div className="mt-1 font-mono text-sm text-white/80">
                 {price.data ? formatFiat(fiatVal, currency) : "—"}
               </div>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setShowSend(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background py-2.5 text-sm font-semibold"
-              >
-                <ArrowUpRight className="h-4 w-4" /> Send
-              </button>
-              <button
-                onClick={() => setShowReceive(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-bitcoin py-2.5 text-sm font-semibold text-primary-foreground"
-              >
-                <ArrowDownLeft className="h-4 w-4" /> Receive
-              </button>
+
+            {/* Lower row — masked xpub + network */}
+            <div className="relative mt-6 flex items-end justify-between gap-2">
+              <div>
+                <div className="text-[9px] uppercase tracking-[0.18em] text-white/50">xpub</div>
+                <div className="font-mono text-[11px] text-white/80">{maskedXpub}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-[9px] uppercase tracking-[0.18em] text-white/50">
+                  {t("wallet.network")}
+                </div>
+                <div className="text-[11px] font-semibold text-white/90">
+                  {wallet?.network === "mainnet" ? "Mainnet" : "Testnet"}
+                </div>
+              </div>
             </div>
+          </div>
+
+          {/* Send / Receive */}
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setShowSend(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card py-2.5 text-sm font-semibold"
+            >
+              <ArrowUpRight className="h-4 w-4" /> {t("common.send")}
+            </button>
+            <button
+              onClick={() => setShowReceive(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-bitcoin py-2.5 text-sm font-semibold text-primary-foreground"
+            >
+              <ArrowDownLeft className="h-4 w-4" /> {t("common.receive")}
+            </button>
           </div>
 
           <section className="mt-5">
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Recent activity</h3>
-              <span className="text-xs text-muted-foreground">{txFlows.length} txs</span>
+              <h3 className="text-sm font-semibold">{t("wallet.recent")}</h3>
+              <span className="text-xs text-muted-foreground">{txFlows.length} {t("wallet.txs")}</span>
             </div>
             <div className="space-y-2">
               {txFlows.slice(0, 8).map((flow) => (
@@ -177,7 +236,7 @@ function WalletScreen() {
               ))}
               {txFlows.length === 0 && (
                 <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                  No transactions yet.
+                  {t("wallet.noTxs")}
                 </div>
               )}
             </div>
@@ -185,12 +244,13 @@ function WalletScreen() {
         </>
       )}
 
+
       {tab === "Addresses" && (
         <div className="mt-4 space-y-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{(sync?.addresses.filter((a) => a.used) ?? []).length} used</span>
+            <span>{(sync?.addresses.filter((a) => a.used) ?? []).length} {t("wallet.used")}</span>
             <button onClick={() => setShowUnused((v) => !v)} className="underline">
-              {showUnused ? "Hide" : "Show"} unused
+              {showUnused ? t("wallet.hideUnused") : t("wallet.showUnused")}
             </button>
           </div>
           {(sync?.addresses ?? [])
@@ -231,7 +291,7 @@ function WalletScreen() {
       {tab === "UTXOs" && (
         <div className="mt-4 space-y-2">
           <div className="text-xs text-muted-foreground">
-            {sync?.utxos.length ?? 0} unspent outputs
+            {sync?.utxos.length ?? 0} {t("wallet.utxos")}
           </div>
           {(sync?.utxos ?? []).map((u) => (
             <div
@@ -250,7 +310,7 @@ function WalletScreen() {
                 <div className="text-right">
                   <div className="font-mono text-sm font-semibold">{formatBtc(u.value)}</div>
                   <div className="text-[10px] text-muted-foreground">
-                    {u.status.confirmed ? "Confirmed" : "Mempool"}
+                    {u.status.confirmed ? t("wallet.confirmed") : t("wallet.mempool")}
                   </div>
                 </div>
               </div>
@@ -258,7 +318,7 @@ function WalletScreen() {
           ))}
           {sync && sync.utxos.length === 0 && (
             <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              No unspent outputs.
+              {t("wallet.noUtxos")}
             </div>
           )}
         </div>
@@ -299,7 +359,13 @@ function TxRow({
     confirmations: number;
   };
 }) {
+  const t = useT();
   const incoming = flow.direction === "in";
+  const label = incoming
+    ? t("wallet.received")
+    : flow.direction === "self"
+      ? t("wallet.selfSend")
+      : t("wallet.sent");
   return (
     <div className="flex items-center justify-between rounded-xl border border-border bg-card p-3">
       <div className="flex items-center gap-3 min-w-0">
@@ -315,13 +381,11 @@ function TxRow({
           )}
         </div>
         <div className="min-w-0">
-          <div className="text-sm font-semibold">
-            {incoming ? "Received" : flow.direction === "self" ? "Self-send" : "Sent"}
-          </div>
+          <div className="text-sm font-semibold">{label}</div>
           <div className="font-mono text-[11px] text-muted-foreground truncate">
             {shortTxid(flow.tx.txid)}
             {" · "}
-            {flow.tx.status.block_time ? timeAgo(flow.tx.status.block_time) : "Unconfirmed"}
+            {flow.tx.status.block_time ? timeAgo(flow.tx.status.block_time) : t("wallet.unconfirmed")}
           </div>
         </div>
       </div>
@@ -335,7 +399,9 @@ function TxRow({
           {formatBtc(flow.net)} BTC
         </div>
         <div className="text-[11px] text-muted-foreground">
-          {flow.confirmations === 0 ? "0 conf" : `${flow.confirmations.toLocaleString()} conf`}
+          {flow.confirmations === 0
+            ? `0 ${t("wallet.conf")}`
+            : `${flow.confirmations.toLocaleString()} ${t("wallet.conf")}`}
         </div>
       </div>
     </div>

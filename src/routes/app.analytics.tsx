@@ -1,22 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Award, TrendingUp, Sparkles } from "lucide-react";
-import { useMarketChart, usePrice, useSync } from "@/hooks/use-bitcoin-data";
+import { Award, TrendingUp, Sparkles, Sprout, Coins, Wallet as WalletIcon, Activity } from "lucide-react";
+import { useAth, useMarketChart, usePrice, useSync } from "@/hooks/use-bitcoin-data";
 import { useAppStore } from "@/store/app";
 import { classifyTxs } from "@/lib/sync-engine";
 import { formatBtc, formatFiat, satsToBtc, timeAgo } from "@/lib/format";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, YAxis } from "recharts";
 import { consumeChartAnimation } from "@/lib/chart-animation";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/analytics")({
   component: Analytics,
 });
 
-const ALL_TIME_HIGH_USD = 109_000; // updated reference point
 
 function Analytics() {
+  const t = useT();
   const { data: sync } = useSync();
   const price = usePrice();
+  const ath = useAth();
   const currency = useAppStore((s) => s.settings.currency);
   const [animateAccChart] = useState(() => consumeChartAnimation("accumulation"));
   // CoinGecko free tier caps historical range to 365 days — "max" returns 401.
@@ -117,9 +119,19 @@ function Analytics() {
       : costBasisIdr * fxFromIdr;
   const avgPrice = acquiredSats > 0 ? costBasisFullDisplay / satsToBtc(acquiredSats) : 0;
 
-  const athDistance = price.data
-    ? ((price.data.usd - ALL_TIME_HIGH_USD) / ALL_TIME_HIGH_USD) * 100
+  // Live ATH from CoinGecko (per active currency for display) — falls back to
+  // a sensible reference until data lands so the UI stays usable.
+  const athDisplay = ath.data
+    ? currency === "USD"
+      ? ath.data.usd
+      : ath.data.idr
     : 0;
+  const athUsd = ath.data?.usd ?? 0;
+  // % distance is currency-invariant (use USD baseline).
+  const athDistance =
+    price.data && athUsd > 0 ? ((price.data.usd - athUsd) / athUsd) * 100 : 0;
+  const athProgress =
+    price.data && athUsd > 0 ? Math.min(100, (price.data.usd / athUsd) * 100) : 0;
 
   // Build accumulation timeline from incoming txs (already sorted ascending).
   const timeline = useMemo(() => {
@@ -139,14 +151,14 @@ function Analytics() {
   return (
     <div className="px-5 pt-6">
       <header>
-        <h1 className="text-2xl font-bold">Analytics</h1>
-        <p className="mt-1 text-xs text-muted-foreground">Portfolio insights & journey</p>
+        <h1 className="text-2xl font-bold">{t("analytics.title")}</h1>
+        <p className="mt-1 text-xs text-muted-foreground">{t("analytics.subtitle")}</p>
       </header>
 
       {/* PnL card */}
       <section className="mt-5 rounded-2xl border border-border bg-card p-5">
         <div className="text-xs uppercase tracking-wider text-muted-foreground">
-          Estimated PnL
+          {t("analytics.pnl")}
         </div>
         <div className="mt-1 flex items-baseline gap-2">
           <div
@@ -164,22 +176,22 @@ function Analytics() {
         </div>
         <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
           <div>
-            <div className="text-muted-foreground">Cost basis</div>
+            <div className="text-muted-foreground">{t("analytics.costBasis")}</div>
             <div className="font-mono">{formatFiat(adjustedCostBasis, currency)}</div>
           </div>
           <div>
-            <div className="text-muted-foreground">Current value</div>
+            <div className="text-muted-foreground">{t("analytics.currentValue")}</div>
             <div className="font-mono">{formatFiat(portfolioValue, currency)}</div>
           </div>
           <div>
-            <div className="text-muted-foreground">Avg buy price</div>
+            <div className="text-muted-foreground">{t("analytics.avgBuyPrice")}</div>
             <div className="font-mono">
               {avgPrice > 0 ? formatFiat(avgPrice, currency) : "—"}
             </div>
           </div>
 
           <div>
-            <div className="text-muted-foreground">Current price</div>
+            <div className="text-muted-foreground">{t("analytics.currentPrice")}</div>
             <div className="font-mono">
               {priceVal > 0 ? formatFiat(priceVal, currency) : "—"}
             </div>
@@ -202,7 +214,7 @@ function Analytics() {
       <section className="mt-5 rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-bitcoin" />
-          <h3 className="text-sm font-semibold">Accumulation</h3>
+          <h3 className="text-sm font-semibold">{t("analytics.accumulation")}</h3>
         </div>
         <div className="mt-3 h-36">
           {timeline.length > 0 ? (
@@ -214,7 +226,7 @@ function Analytics() {
                     <stop offset="100%" stopColor="var(--bitcoin)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-              <YAxis hide domain={[0, "dataMax"]} />
+                <YAxis hide domain={[0, "dataMax"]} />
                 <Tooltip
                   contentStyle={{
                     background: "var(--card)",
@@ -236,88 +248,109 @@ function Analytics() {
                   fill="url(#acc)"
                   isAnimationActive={animateAccChart}
                 />
-
               </AreaChart>
             </ResponsiveContainer>
           ) : (
             <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-              No accumulation data yet.
+              {t("analytics.noAccum")}
             </div>
           )}
         </div>
       </section>
 
-      {/* BTC vs ATH */}
+      {/* BTC vs ATH — live CoinGecko */}
       <section className="mt-5 rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center gap-2">
           <Award className="h-4 w-4 text-bitcoin" />
-          <h3 className="text-sm font-semibold">vs All-Time High</h3>
+          <h3 className="text-sm font-semibold">{t("analytics.vsAth")}</h3>
         </div>
         <div className="mt-3 flex items-baseline gap-2">
           <div className="font-mono text-2xl font-bold">
-            {athDistance >= 0 ? "+" : ""}
-            {athDistance.toFixed(2)}%
+            {ath.data && price.data ? `${athDistance >= 0 ? "+" : ""}${athDistance.toFixed(2)}%` : "—"}
           </div>
           <div className="text-xs text-muted-foreground">
-            ATH ${ALL_TIME_HIGH_USD.toLocaleString()}
+            {t("analytics.athLabel")} {athDisplay > 0 ? formatFiat(athDisplay, currency) : "—"}
           </div>
         </div>
         <div className="mt-3 h-2 rounded-full bg-background">
           <div
             className="h-full rounded-full gradient-bitcoin"
-            style={{
-              width: `${Math.min(100, ((price.data?.usd ?? 0) / ALL_TIME_HIGH_USD) * 100)}%`,
-            }}
+            style={{ width: `${athProgress}%` }}
           />
         </div>
       </section>
 
-      {/* Bitcoin Journey */}
+      {/* Bitcoin Journey — vertical flowchart timeline */}
       <section className="mt-5 rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-bitcoin" />
-          <h3 className="text-sm font-semibold">Your Bitcoin Journey</h3>
+          <h3 className="text-sm font-semibold">{t("analytics.journey")}</h3>
         </div>
-        <ul className="mt-3 space-y-3">
+        <ol className="relative mt-4 pl-2">
           {firstReceive && (
-            <Milestone
-              title="First sats"
+            <TimelineStep
+              icon={<Sprout className="h-3.5 w-3.5" />}
+              title={t("analytics.firstSats")}
               when={timeAgo(firstReceive.tx.status.block_time as number)}
               detail={`+${formatBtc(firstReceive.net)} BTC`}
             />
           )}
-          <Milestone
-            title="Total received"
-            detail={`${formatBtc(totalReceivedSats)} BTC across ${incoming.length} txs`}
+          <TimelineStep
+            icon={<Coins className="h-3.5 w-3.5" />}
+            title={t("analytics.totalReceived")}
+            detail={`${formatBtc(totalReceivedSats)} BTC ${t("analytics.acrossTxs")} ${incoming.length} ${t("analytics.txsWord")}`}
           />
-          <Milestone
-            title="Current stack"
+          <TimelineStep
+            icon={<WalletIcon className="h-3.5 w-3.5" />}
+            title={t("analytics.currentStack")}
             detail={`${formatBtc(sync?.totalBalance ?? 0)} BTC · ${formatFiat(portfolioValue, currency)}`}
           />
-          <Milestone
-            title="Daily change"
+          <TimelineStep
+            icon={<Activity className="h-3.5 w-3.5" />}
+            title={t("analytics.dailyChange")}
             detail={
               price.data
                 ? `${price.data.usd_24h_change >= 0 ? "+" : ""}${price.data.usd_24h_change.toFixed(2)}% (24h)`
                 : "—"
             }
+            last
           />
-        </ul>
+        </ol>
       </section>
     </div>
   );
 }
 
-function Milestone({ title, when, detail }: { title: string; when?: string; detail: string }) {
+function TimelineStep({
+  icon,
+  title,
+  when,
+  detail,
+  last,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  when?: string;
+  detail: string;
+  last?: boolean;
+}) {
   return (
-    <li className="flex items-start gap-3">
-      <div className="mt-1.5 h-2 w-2 rounded-full bg-bitcoin" />
-      <div className="flex-1">
-        <div className="text-sm font-semibold">{title}</div>
-        <div className="text-xs text-muted-foreground">
-          {when && <span>{when} · </span>}
-          {detail}
-        </div>
+    <li className="relative pl-9 pb-5 last:pb-0">
+      {/* Connector line */}
+      {!last && (
+        <span
+          aria-hidden
+          className="absolute left-[10px] top-6 bottom-0 w-px bg-border"
+        />
+      )}
+      {/* Node marker */}
+      <span className="absolute left-0 top-0 flex h-[22px] w-[22px] items-center justify-center rounded-full border border-bitcoin/40 bg-bitcoin/10 text-bitcoin">
+        {icon}
+      </span>
+      <div className="text-sm font-semibold leading-tight">{title}</div>
+      <div className="mt-0.5 text-xs text-muted-foreground">
+        {when && <span>{when} · </span>}
+        {detail}
       </div>
     </li>
   );

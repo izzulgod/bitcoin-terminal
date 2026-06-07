@@ -6,11 +6,13 @@ import {
   fetchPrice,
   fetchMarketChart,
   fetchFearGreed,
+  fetchAth,
   mempoolApi,
   type RecommendedFees,
   type MempoolInfo,
   type PriceData,
   type MarketChartPoint,
+  type AthData,
 } from "@/lib/mempool";
 
 export function useSync() {
@@ -49,6 +51,14 @@ export function useFearGreed() {
     queryKey: ["fng"],
     queryFn: fetchFearGreed,
     staleTime: 30 * 60_000,
+  });
+}
+
+export function useAth() {
+  return useQuery<AthData>({
+    queryKey: ["ath"],
+    queryFn: fetchAth,
+    staleTime: 60 * 60_000,
   });
 }
 

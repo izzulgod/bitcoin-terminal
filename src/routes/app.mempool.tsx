@@ -2,12 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useFees, useMempoolStats, useTipBlock } from "@/hooks/use-bitcoin-data";
 import { Activity, Box, Clock, Gauge, Zap } from "lucide-react";
 import { timeAgo } from "@/lib/format";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/mempool")({
   component: MempoolScreen,
 });
 
 function MempoolScreen() {
+  const t = useT();
   const fees = useFees();
   const mempool = useMempoolStats();
   const tip = useTipBlock();
@@ -19,40 +21,38 @@ function MempoolScreen() {
     <div className="px-5 pt-6">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Mempool</h1>
-          <p className="mt-1 text-xs text-muted-foreground">Real-time blockchain status</p>
+          <h1 className="text-2xl font-bold">{t("mempool.title")}</h1>
+          <p className="mt-1 text-xs text-muted-foreground">{t("mempool.subtitle")}</p>
         </div>
         <div className="flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 text-xs text-success">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" />
-          Live
+          {t("common.live")}
         </div>
       </header>
 
-      {/* Tip block */}
       <section className="mt-5 rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Box className="h-4 w-4 text-bitcoin" />
-          Latest block
+          {t("mempool.latestBlock")}
         </div>
         <div className="mt-1 font-mono text-2xl font-bold">
           #{tipBlock?.height.toLocaleString() ?? "—"}
         </div>
         <div className="mt-1 text-xs text-muted-foreground">
-          {tipBlock ? timeAgo(tipBlock.timestamp) : "—"} · next in ~10 min
+          {tipBlock ? timeAgo(tipBlock.timestamp) : "—"} · {t("mempool.nextIn")}
         </div>
       </section>
 
-      {/* Mempool stats */}
       <section className="mt-5 rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center gap-2">
           <Activity className="h-4 w-4 text-bitcoin" />
-          <h3 className="text-sm font-semibold">Mempool pressure</h3>
+          <h3 className="text-sm font-semibold">{t("mempool.pressure")}</h3>
         </div>
         <div className="mt-3 flex items-baseline gap-2">
           <div className="font-mono text-2xl font-bold">
             {mempool.data?.count.toLocaleString() ?? "—"}
           </div>
-          <div className="text-xs text-muted-foreground">unconfirmed txs</div>
+          <div className="text-xs text-muted-foreground">{t("mempool.unconfirmed")}</div>
         </div>
         <div className="mt-3 h-3 overflow-hidden rounded-full bg-background">
           <div
@@ -64,18 +64,16 @@ function MempoolScreen() {
           />
         </div>
         <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
-          <span>Calm</span>
-          <span>Congested</span>
+          <span>{t("mempool.calm")}</span>
+          <span>{t("mempool.congested")}</span>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
           <Stat
-            label="vSize"
-            value={
-              mempool.data ? `${(mempool.data.vsize / 1_000_000).toFixed(1)} MvB` : "—"
-            }
+            label={t("mempool.vsize")}
+            value={mempool.data ? `${(mempool.data.vsize / 1_000_000).toFixed(1)} MvB` : "—"}
           />
           <Stat
-            label="Total fees"
+            label={t("mempool.totalFees")}
             value={
               mempool.data
                 ? `${(mempool.data.total_fee / 100_000_000).toFixed(3)} BTC`
@@ -85,46 +83,45 @@ function MempoolScreen() {
         </div>
       </section>
 
-      {/* Fee tiers */}
       <section className="mt-5 rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center gap-2">
           <Gauge className="h-4 w-4 text-bitcoin" />
-          <h3 className="text-sm font-semibold">Recommended fees</h3>
+          <h3 className="text-sm font-semibold">{t("mempool.recommendedFees")}</h3>
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2">
           <FeeTier
-            label="Slow"
-            sub="~1 hour"
+            label={t("mempool.slow")}
+            sub={t("mempool.nextHour")}
             value={fees.data?.hourFee}
             color="text-success"
           />
           <FeeTier
-            label="Normal"
-            sub="~30 min"
+            label={t("mempool.normal")}
+            sub={t("mempool.next30")}
             value={fees.data?.halfHourFee}
             color="text-warning"
           />
           <FeeTier
-            label="Fast"
-            sub="next block"
+            label={t("mempool.fast")}
+            sub={t("mempool.nextBlock")}
             value={fees.data?.fastestFee}
             color="text-bitcoin"
           />
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-          <Stat label="Economy" value={fees.data ? `${fees.data.economyFee} sat/vB` : "—"} />
-          <Stat label="Minimum" value={fees.data ? `${fees.data.minimumFee} sat/vB` : "—"} />
+          <Stat label={t("mempool.economy")} value={fees.data ? `${fees.data.economyFee} sat/vB` : "—"} />
+          <Stat label={t("mempool.minimum")} value={fees.data ? `${fees.data.minimumFee} sat/vB` : "—"} />
         </div>
       </section>
 
-      {/* Next block estimate */}
       <section className="mt-5 rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-bitcoin" />
-          <h3 className="text-sm font-semibold">Next block</h3>
+          <h3 className="text-sm font-semibold">{t("mempool.nextBlockTitle")}</h3>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Avg block time is 10 minutes. Pay <strong className="text-bitcoin">{fees.data?.fastestFee ?? "—"} sat/vB</strong> to land in the next block.
+          {t("mempool.nextBlockHint")}{" "}
+          <strong className="text-bitcoin">{fees.data?.fastestFee ?? "—"} sat/vB</strong>
         </p>
       </section>
     </div>

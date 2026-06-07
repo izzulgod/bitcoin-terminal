@@ -18,6 +18,7 @@ import {
   accountPath,
 } from "@/lib/ledger";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -171,6 +172,7 @@ function Landing() {
 }
 
 function Intro({ onNext, addMode }: { onNext: () => void; addMode: boolean }) {
+  const t = useT();
   return (
     <div
       className="mx-auto flex min-h-[100dvh] max-w-md flex-col px-6 py-8"
@@ -182,31 +184,31 @@ function Intro({ onNext, addMode }: { onNext: () => void; addMode: boolean }) {
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold leading-tight tracking-tight">
           {addMode ? (
-            <>Add another <span className="text-bitcoin">wallet.</span></>
+            <>{t("intro.addAnother")}</>
           ) : (
             <>
-              Your Bitcoin.
+              {t("intro.title.line1")}
               <br />
-              <span className="text-bitcoin">Fully private.</span>
+              <span className="text-bitcoin">{t("intro.title.line2")}</span>
               <br />
-              Fully visible.
+              {t("intro.title.line3")}
             </>
           )}
         </h1>
         <p className="mt-4 text-sm sm:text-base text-muted-foreground">
-          Connect a Ledger or paste an xpub. Your keys never leave the device.
+          {t("intro.subtitle")}
         </p>
         <div className="mt-8 grid w-full grid-cols-3 gap-3 text-xs">
-          <Feature icon={Usb} label="Ledger" />
-          <Feature icon={ShieldCheck} label="No keys" />
-          <Feature icon={Activity} label="Real-time" />
+          <Feature icon={Usb} label={t("intro.feat.ledger")} />
+          <Feature icon={ShieldCheck} label={t("intro.feat.noKeys")} />
+          <Feature icon={Activity} label={t("intro.feat.realtime")} />
         </div>
       </div>
       <button
         onClick={onNext}
         className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-bitcoin py-4 text-base font-semibold text-primary-foreground transition-all hover:opacity-95 active:scale-[0.99]"
       >
-        {addMode ? "Add wallet" : "Get started"} <ArrowRight className="h-5 w-5" />
+        {addMode ? t("intro.cta.add") : t("intro.cta.start")} <ArrowRight className="h-5 w-5" />
       </button>
     </div>
   );
@@ -238,12 +240,11 @@ function ImportScreen({
 }) {
   const [mode, setMode] = useState<"choose" | "xpub">("choose");
   const hidSupported = isWebHidSupported();
+  const t = useT();
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-10">
-      <h2 className="text-2xl font-bold">Import wallet</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Pilih cara import yang paling nyaman.
-      </p>
+      <h2 className="text-2xl font-bold">{t("import.title")}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">{t("import.subtitle")}</p>
 
       {mode === "choose" && (
         <div className="mt-6 space-y-4">
@@ -255,18 +256,17 @@ function ImportScreen({
             >
               {connecting ? (
                 <>
-                  <Loader2 className="h-5 w-5 animate-spin" /> Waiting for Ledger…
+                  <Loader2 className="h-5 w-5 animate-spin" /> {t("import.waitingLedger")}
                 </>
               ) : (
                 <>
-                  <Usb className="h-5 w-5" /> Connect Ledger
+                  <Usb className="h-5 w-5" /> {t("import.connectLedger")}
                 </>
               )}
             </button>
           ) : (
             <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
-              Your browser does not support Ledger (WebHID). Use manual xpub
-              import, or open in Chrome / Edge / Brave on desktop / Android.
+              {t("import.hidUnsupported")}
             </div>
           )}
 
@@ -276,7 +276,7 @@ function ImportScreen({
             onClick={() => setMode("xpub")}
             className="block w-full text-center text-sm text-muted-foreground underline"
           >
-            Paste xpub manually
+            {t("import.pasteManual")}
           </button>
         </div>
       )}
@@ -293,21 +293,21 @@ function ImportScreen({
           />
           {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
           <div className="mt-4 rounded-xl border border-border bg-card/50 p-3 text-xs text-muted-foreground">
-            Your xpub stays on this device. We only query public block explorers.
+            {t("import.privacyNote")}
           </div>
           <div className="mt-auto flex gap-2 pt-6">
             <button
               onClick={() => setMode("choose")}
               className="flex-1 rounded-xl border border-border bg-card py-4 font-medium"
             >
-              Back
+              {t("common.back")}
             </button>
             <button
               onClick={onSubmit}
               disabled={!value.trim()}
               className="flex-[2] inline-flex items-center justify-center gap-2 rounded-xl bg-bitcoin py-4 font-semibold text-primary-foreground disabled:opacity-40"
             >
-              Detect <ArrowRight className="h-5 w-5" />
+              {t("import.detect")} <ArrowRight className="h-5 w-5" />
             </button>
           </div>
         </>
@@ -337,17 +337,16 @@ function DetectScreen({
     { type: "p2pkh", label: "BIP44 · Legacy", example: "1..." },
     { type: "p2tr", label: "BIP86 · Taproot", example: "bc1p..." },
   ];
+  const t = useT();
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-10">
-      <h2 className="text-2xl font-bold">Detected wallet</h2>
+      <h2 className="text-2xl font-bold">{t("detect.title")}</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        {source === "ledger"
-          ? "xpub imported from Ledger."
-          : "Confirm the script type."}
+        {source === "ledger" ? t("detect.subFromLedger") : t("detect.subConfirm")}
       </p>
 
       <div className="mt-6 rounded-xl border border-bitcoin/30 bg-bitcoin/5 p-4">
-        <div className="text-xs uppercase tracking-wider text-muted-foreground">Network</div>
+        <div className="text-xs uppercase tracking-wider text-muted-foreground">{t("detect.network")}</div>
         <div className="mt-1 font-semibold">
           Bitcoin {detected.network === "mainnet" ? "Mainnet" : "Testnet"}
         </div>
@@ -385,13 +384,13 @@ function DetectScreen({
           onClick={onBack}
           className="flex-1 rounded-xl border border-border bg-card py-3.5 font-medium"
         >
-          Back
+          {t("common.back")}
         </button>
         <button
           onClick={onNext}
           className="flex-[2] rounded-xl bg-bitcoin py-3.5 font-semibold text-primary-foreground"
         >
-          Continue
+          {t("common.continue")}
         </button>
       </div>
     </div>
@@ -423,30 +422,31 @@ function SecurityScreen({
   onConfirm: () => void;
   showPinSection: boolean;
 }) {
+  const t = useT();
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-10">
-      <h2 className="text-2xl font-bold">Name {showPinSection ? "& lock" : "wallet"}</h2>
+      <h2 className="text-2xl font-bold">{showPinSection ? t("security.title.lock") : t("security.title.name")}</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Give this wallet a label{showPinSection ? ", then optionally set a 6-digit PIN." : "."}
+        {showPinSection ? t("security.sub.lock") : t("security.sub.name")}
       </p>
 
       <div className="mt-6 rounded-xl border border-border bg-card p-4">
         <label className="text-xs uppercase tracking-wider text-muted-foreground">
-          Wallet name
+          {t("security.walletName")}
         </label>
         <input
           type="text"
           value={walletLabel}
           onChange={(e) => setWalletLabel(e.target.value)}
           maxLength={40}
-          placeholder="e.g. Ledger, Cold Stack, Savings"
+          placeholder={t("security.walletNamePlaceholder")}
           className="mt-2 w-full rounded-lg border border-border bg-background p-3 text-sm focus:border-bitcoin focus:outline-none"
         />
         {error && /wallet name/i.test(error) ? (
           <p className="mt-2 text-sm text-destructive">{error}</p>
         ) : (
           <p className="mt-1 text-[11px] text-muted-foreground">
-            You can rename it anytime from the Wallet tab.
+            {t("security.renameHint")}
           </p>
         )}
       </div>
@@ -455,8 +455,8 @@ function SecurityScreen({
         <>
           <label className="mt-4 flex items-center justify-between rounded-xl border border-border bg-card p-4">
             <div>
-              <div className="font-semibold">Enable PIN</div>
-              <div className="text-xs text-muted-foreground">Required on app open</div>
+              <div className="font-semibold">{t("security.enablePin")}</div>
+              <div className="text-xs text-muted-foreground">{t("security.pinHint")}</div>
             </div>
             <input
               type="checkbox"
@@ -474,7 +474,7 @@ function SecurityScreen({
                 maxLength={6}
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-                placeholder="6-digit PIN"
+                placeholder={t("security.pinPlaceholder")}
                 className="w-full rounded-xl border border-border bg-card p-4 text-center font-mono text-xl tracking-[0.5em] focus:border-bitcoin focus:outline-none"
               />
               <input
@@ -483,7 +483,7 @@ function SecurityScreen({
                 maxLength={6}
                 value={pinConfirm}
                 onChange={(e) => setPinConfirm(e.target.value.replace(/\D/g, ""))}
-                placeholder="Confirm PIN"
+                placeholder={t("security.pinConfirm")}
                 className="w-full rounded-xl border border-border bg-card p-4 text-center font-mono text-xl tracking-[0.5em] focus:border-bitcoin focus:outline-none"
               />
             </div>
@@ -499,7 +499,7 @@ function SecurityScreen({
         onClick={onConfirm}
         className="mt-auto rounded-xl bg-bitcoin py-4 font-semibold text-primary-foreground"
       >
-        Finish setup
+        {t("security.confirm")}
       </button>
     </div>
   );

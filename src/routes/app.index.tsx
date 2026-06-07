@@ -27,6 +27,7 @@ import { WalletSwitcher } from "@/components/wallet-switcher";
 import { ReceiveModal } from "@/components/receive-modal";
 import { SendModal } from "@/components/send-modal";
 import { consumeChartAnimation } from "@/lib/chart-animation";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/")({
   component: Home,
@@ -40,6 +41,7 @@ const RANGES = [
 ] as const;
 
 function Home() {
+  const t = useT();
   const settings = useAppStore((s) => s.settings);
   const updateSettings = useAppStore((s) => s.updateSettings);
   const { data: sync, refetch, isFetching } = useSync();
@@ -82,7 +84,7 @@ function Home() {
           <button
             onClick={() => refetch()}
             className="rounded-lg border border-border bg-card p-1.5"
-            aria-label="Refresh"
+            aria-label={t("common.refresh")}
           >
             <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
           </button>
@@ -92,7 +94,7 @@ function Home() {
       {/* Portfolio header */}
       <section className="mt-7">
         <div className="text-xs uppercase tracking-wider text-muted-foreground">
-          Total balance
+          {t("home.totalBalance")}
         </div>
         <div className="mt-1 flex items-baseline gap-2">
           <div className="font-mono text-4xl font-bold tracking-tight">
@@ -113,13 +115,13 @@ function Home() {
             onClick={() => setShowSend(true)}
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 text-sm font-semibold"
           >
-            <ArrowUpRight className="h-4 w-4" /> Send
+            <ArrowUpRight className="h-4 w-4" /> {t("common.send")}
           </button>
           <button
             onClick={() => setShowReceive(true)}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-bitcoin py-3 text-sm font-semibold text-primary-foreground"
           >
-            <ArrowDownLeft className="h-4 w-4" /> Receive
+            <ArrowDownLeft className="h-4 w-4" /> {t("common.receive")}
           </button>
         </div>
       </section>
@@ -129,7 +131,7 @@ function Home() {
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div className="min-w-0">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">
-              BTC Price
+              {t("home.btcPrice")}
             </div>
             <div className="font-mono text-xl font-semibold truncate">
               {price.data ? formatFiat(priceVal, currency) : "—"}
@@ -181,7 +183,7 @@ function Home() {
             </ResponsiveContainer>
           ) : (
             <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-              Loading chart…
+              {t("home.chartLoading")}
             </div>
           )}
         </div>
@@ -197,7 +199,7 @@ function Home() {
               <TrendingDown className="h-4 w-4" />
             )
           }
-          label="24h Change"
+          label={t("home.24hChange")}
           value={
             price.data
               ? `${price.data.usd_24h_change >= 0 ? "+" : ""}${price.data.usd_24h_change.toFixed(2)}%`
@@ -213,17 +215,17 @@ function Home() {
         />
         <InsightCard
           icon={<Flame className="h-4 w-4" />}
-          label="Fear & Greed"
+          label={t("home.fearGreed")}
           value={fng.data ? `${fng.data.value} · ${fng.data.classification}` : "—"}
         />
         <InsightCard
           icon={<Activity className="h-4 w-4" />}
-          label="Mempool"
+          label={t("home.mempool")}
           value={mempool.data ? `${mempool.data.count.toLocaleString()} tx` : "—"}
         />
         <InsightCard
           icon={<Zap className="h-4 w-4" />}
-          label="Fast Fee"
+          label={t("home.fastFee")}
           value={fees.data ? `${fees.data.fastestFee} sat/vB` : "—"}
         />
       </section>
