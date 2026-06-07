@@ -131,7 +131,7 @@ function Home() {
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div className="min-w-0">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">
-              BTC Price
+              {t("home.btcPrice")}
             </div>
             <div className="font-mono text-xl font-semibold truncate">
               {price.data ? formatFiat(priceVal, currency) : "—"}
