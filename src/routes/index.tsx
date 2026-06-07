@@ -18,6 +18,7 @@ import {
   accountPath,
 } from "@/lib/ledger";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   validateSearch: (s: Record<string, unknown>) => ({
