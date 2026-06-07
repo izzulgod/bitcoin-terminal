@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useFees, useMempoolStats, useTipBlock } from "@/hooks/use-bitcoin-data";
 import { Activity, Box, Clock, Gauge, Zap } from "lucide-react";
 import { timeAgo } from "@/lib/format";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/mempool")({
   component: MempoolScreen,
