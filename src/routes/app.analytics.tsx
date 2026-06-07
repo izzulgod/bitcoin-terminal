@@ -151,14 +151,14 @@ function Analytics() {
   return (
     <div className="px-5 pt-6">
       <header>
-        <h1 className="text-2xl font-bold">Analytics</h1>
-        <p className="mt-1 text-xs text-muted-foreground">Portfolio insights & journey</p>
+        <h1 className="text-2xl font-bold">{t("analytics.title")}</h1>
+        <p className="mt-1 text-xs text-muted-foreground">{t("analytics.subtitle")}</p>
       </header>
 
       {/* PnL card */}
       <section className="mt-5 rounded-2xl border border-border bg-card p-5">
         <div className="text-xs uppercase tracking-wider text-muted-foreground">
-          Estimated PnL
+          {t("analytics.pnl")}
         </div>
         <div className="mt-1 flex items-baseline gap-2">
           <div
