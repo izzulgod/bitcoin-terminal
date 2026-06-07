@@ -27,6 +27,7 @@ import { WalletSwitcher } from "@/components/wallet-switcher";
 import { ReceiveModal } from "@/components/receive-modal";
 import { SendModal } from "@/components/send-modal";
 import { consumeChartAnimation } from "@/lib/chart-animation";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/")({
   component: Home,
