@@ -291,7 +291,7 @@ function WalletScreen() {
       {tab === "UTXOs" && (
         <div className="mt-4 space-y-2">
           <div className="text-xs text-muted-foreground">
-            {sync?.utxos.length ?? 0} unspent outputs
+            {sync?.utxos.length ?? 0} {t("wallet.utxos")}
           </div>
           {(sync?.utxos ?? []).map((u) => (
             <div
