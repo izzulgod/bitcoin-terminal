@@ -84,7 +84,7 @@ function Home() {
           <button
             onClick={() => refetch()}
             className="rounded-lg border border-border bg-card p-1.5"
-            aria-label="Refresh"
+            aria-label={t("common.refresh")}
           >
             <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
           </button>
