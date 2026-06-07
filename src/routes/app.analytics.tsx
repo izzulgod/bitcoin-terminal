@@ -214,7 +214,7 @@ function Analytics() {
       <section className="mt-5 rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-bitcoin" />
-          <h3 className="text-sm font-semibold">Accumulation</h3>
+          <h3 className="text-sm font-semibold">{t("analytics.accumulation")}</h3>
         </div>
         <div className="mt-3 h-36">
           {timeline.length > 0 ? (
@@ -226,7 +226,7 @@ function Analytics() {
                     <stop offset="100%" stopColor="var(--bitcoin)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-              <YAxis hide domain={[0, "dataMax"]} />
+                <YAxis hide domain={[0, "dataMax"]} />
                 <Tooltip
                   contentStyle={{
                     background: "var(--card)",
@@ -248,88 +248,109 @@ function Analytics() {
                   fill="url(#acc)"
                   isAnimationActive={animateAccChart}
                 />
-
               </AreaChart>
             </ResponsiveContainer>
           ) : (
             <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-              No accumulation data yet.
+              {t("analytics.noAccum")}
             </div>
           )}
         </div>
       </section>
 
-      {/* BTC vs ATH */}
+      {/* BTC vs ATH — live CoinGecko */}
       <section className="mt-5 rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center gap-2">
           <Award className="h-4 w-4 text-bitcoin" />
-          <h3 className="text-sm font-semibold">vs All-Time High</h3>
+          <h3 className="text-sm font-semibold">{t("analytics.vsAth")}</h3>
         </div>
         <div className="mt-3 flex items-baseline gap-2">
           <div className="font-mono text-2xl font-bold">
-            {athDistance >= 0 ? "+" : ""}
-            {athDistance.toFixed(2)}%
+            {ath.data && price.data ? `${athDistance >= 0 ? "+" : ""}${athDistance.toFixed(2)}%` : "—"}
           </div>
           <div className="text-xs text-muted-foreground">
-            ATH ${ALL_TIME_HIGH_USD.toLocaleString()}
+            {t("analytics.athLabel")} {athDisplay > 0 ? formatFiat(athDisplay, currency) : "—"}
           </div>
         </div>
         <div className="mt-3 h-2 rounded-full bg-background">
           <div
             className="h-full rounded-full gradient-bitcoin"
-            style={{
-              width: `${Math.min(100, ((price.data?.usd ?? 0) / ALL_TIME_HIGH_USD) * 100)}%`,
-            }}
+            style={{ width: `${athProgress}%` }}
           />
         </div>
       </section>
 
-      {/* Bitcoin Journey */}
+      {/* Bitcoin Journey — vertical flowchart timeline */}
       <section className="mt-5 rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-bitcoin" />
-          <h3 className="text-sm font-semibold">Your Bitcoin Journey</h3>
+          <h3 className="text-sm font-semibold">{t("analytics.journey")}</h3>
         </div>
-        <ul className="mt-3 space-y-3">
+        <ol className="relative mt-4 pl-2">
           {firstReceive && (
-            <Milestone
-              title="First sats"
+            <TimelineStep
+              icon={<Sprout className="h-3.5 w-3.5" />}
+              title={t("analytics.firstSats")}
               when={timeAgo(firstReceive.tx.status.block_time as number)}
               detail={`+${formatBtc(firstReceive.net)} BTC`}
             />
           )}
-          <Milestone
-            title="Total received"
-            detail={`${formatBtc(totalReceivedSats)} BTC across ${incoming.length} txs`}
+          <TimelineStep
+            icon={<Coins className="h-3.5 w-3.5" />}
+            title={t("analytics.totalReceived")}
+            detail={`${formatBtc(totalReceivedSats)} BTC ${t("analytics.acrossTxs")} ${incoming.length} ${t("analytics.txsWord")}`}
           />
-          <Milestone
-            title="Current stack"
+          <TimelineStep
+            icon={<WalletIcon className="h-3.5 w-3.5" />}
+            title={t("analytics.currentStack")}
             detail={`${formatBtc(sync?.totalBalance ?? 0)} BTC · ${formatFiat(portfolioValue, currency)}`}
           />
-          <Milestone
-            title="Daily change"
+          <TimelineStep
+            icon={<Activity className="h-3.5 w-3.5" />}
+            title={t("analytics.dailyChange")}
             detail={
               price.data
                 ? `${price.data.usd_24h_change >= 0 ? "+" : ""}${price.data.usd_24h_change.toFixed(2)}% (24h)`
                 : "—"
             }
+            last
           />
-        </ul>
+        </ol>
       </section>
     </div>
   );
 }
 
-function Milestone({ title, when, detail }: { title: string; when?: string; detail: string }) {
+function TimelineStep({
+  icon,
+  title,
+  when,
+  detail,
+  last,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  when?: string;
+  detail: string;
+  last?: boolean;
+}) {
   return (
-    <li className="flex items-start gap-3">
-      <div className="mt-1.5 h-2 w-2 rounded-full bg-bitcoin" />
-      <div className="flex-1">
-        <div className="text-sm font-semibold">{title}</div>
-        <div className="text-xs text-muted-foreground">
-          {when && <span>{when} · </span>}
-          {detail}
-        </div>
+    <li className="relative pl-9 pb-5 last:pb-0">
+      {/* Connector line */}
+      {!last && (
+        <span
+          aria-hidden
+          className="absolute left-[10px] top-6 bottom-0 w-px bg-border"
+        />
+      )}
+      {/* Node marker */}
+      <span className="absolute left-0 top-0 flex h-[22px] w-[22px] items-center justify-center rounded-full border border-bitcoin/40 bg-bitcoin/10 text-bitcoin">
+        {icon}
+      </span>
+      <div className="text-sm font-semibold leading-tight">{title}</div>
+      <div className="mt-0.5 text-xs text-muted-foreground">
+        {when && <span>{when} · </span>}
+        {detail}
       </div>
     </li>
   );
