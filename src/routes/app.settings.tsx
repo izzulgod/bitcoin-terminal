@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { AppLanguage } from "@/lib/wallet-store";
+import { useT } from "@/lib/i18n";
 
 const GITHUB_URL = "https://github.com/izzulgod/bitcoin-terminal";
 
