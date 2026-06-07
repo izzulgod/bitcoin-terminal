@@ -41,6 +41,7 @@ const RANGES = [
 ] as const;
 
 function Home() {
+  const t = useT();
   const settings = useAppStore((s) => s.settings);
   const updateSettings = useAppStore((s) => s.updateSettings);
   const { data: sync, refetch, isFetching } = useSync();
