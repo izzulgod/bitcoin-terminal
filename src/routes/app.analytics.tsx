@@ -14,11 +14,11 @@ export const Route = createFileRoute("/app/analytics")({
 });
 
 
-const ALL_TIME_HIGH_USD = 109_000; // updated reference point
-
 function Analytics() {
+  const t = useT();
   const { data: sync } = useSync();
   const price = usePrice();
+  const ath = useAth();
   const currency = useAppStore((s) => s.settings.currency);
   const [animateAccChart] = useState(() => consumeChartAnimation("accumulation"));
   // CoinGecko free tier caps historical range to 365 days — "max" returns 401.
