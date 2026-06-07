@@ -310,7 +310,7 @@ function WalletScreen() {
                 <div className="text-right">
                   <div className="font-mono text-sm font-semibold">{formatBtc(u.value)}</div>
                   <div className="text-[10px] text-muted-foreground">
-                    {u.status.confirmed ? "Confirmed" : "Mempool"}
+                    {u.status.confirmed ? t("wallet.confirmed") : t("wallet.mempool")}
                   </div>
                 </div>
               </div>
