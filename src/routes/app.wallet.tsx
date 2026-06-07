@@ -248,9 +248,9 @@ function WalletScreen() {
       {tab === "Addresses" && (
         <div className="mt-4 space-y-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{(sync?.addresses.filter((a) => a.used) ?? []).length} used</span>
+            <span>{(sync?.addresses.filter((a) => a.used) ?? []).length} {t("wallet.used")}</span>
             <button onClick={() => setShowUnused((v) => !v)} className="underline">
-              {showUnused ? "Hide" : "Show"} unused
+              {showUnused ? t("wallet.hideUnused") : t("wallet.showUnused")}
             </button>
           </div>
           {(sync?.addresses ?? [])
