@@ -199,7 +199,7 @@ function Home() {
               <TrendingDown className="h-4 w-4" />
             )
           }
-          label="24h Change"
+          label={t("home.24hChange")}
           value={
             price.data
               ? `${price.data.usd_24h_change >= 0 ? "+" : ""}${price.data.usd_24h_change.toFixed(2)}%`
@@ -215,17 +215,17 @@ function Home() {
         />
         <InsightCard
           icon={<Flame className="h-4 w-4" />}
-          label="Fear & Greed"
+          label={t("home.fearGreed")}
           value={fng.data ? `${fng.data.value} · ${fng.data.classification}` : "—"}
         />
         <InsightCard
           icon={<Activity className="h-4 w-4" />}
-          label="Mempool"
+          label={t("home.mempool")}
           value={mempool.data ? `${mempool.data.count.toLocaleString()} tx` : "—"}
         />
         <InsightCard
           icon={<Zap className="h-4 w-4" />}
-          label="Fast Fee"
+          label={t("home.fastFee")}
           value={fees.data ? `${fees.data.fastestFee} sat/vB` : "—"}
         />
       </section>
