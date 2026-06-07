@@ -183,7 +183,7 @@ function Home() {
             </ResponsiveContainer>
           ) : (
             <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-              Loading chart…
+              {t("home.chartLoading")}
             </div>
           )}
         </div>
