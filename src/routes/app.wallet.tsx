@@ -359,7 +359,13 @@ function TxRow({
     confirmations: number;
   };
 }) {
+  const t = useT();
   const incoming = flow.direction === "in";
+  const label = incoming
+    ? t("wallet.received")
+    : flow.direction === "self"
+      ? t("wallet.selfSend")
+      : t("wallet.sent");
   return (
     <div className="flex items-center justify-between rounded-xl border border-border bg-card p-3">
       <div className="flex items-center gap-3 min-w-0">
@@ -375,13 +381,11 @@ function TxRow({
           )}
         </div>
         <div className="min-w-0">
-          <div className="text-sm font-semibold">
-            {incoming ? "Received" : flow.direction === "self" ? "Self-send" : "Sent"}
-          </div>
+          <div className="text-sm font-semibold">{label}</div>
           <div className="font-mono text-[11px] text-muted-foreground truncate">
             {shortTxid(flow.tx.txid)}
             {" · "}
-            {flow.tx.status.block_time ? timeAgo(flow.tx.status.block_time) : "Unconfirmed"}
+            {flow.tx.status.block_time ? timeAgo(flow.tx.status.block_time) : t("wallet.unconfirmed")}
           </div>
         </div>
       </div>
@@ -395,7 +399,9 @@ function TxRow({
           {formatBtc(flow.net)} BTC
         </div>
         <div className="text-[11px] text-muted-foreground">
-          {flow.confirmations === 0 ? "0 conf" : `${flow.confirmations.toLocaleString()} conf`}
+          {flow.confirmations === 0
+            ? `0 ${t("wallet.conf")}`
+            : `${flow.confirmations.toLocaleString()} ${t("wallet.conf")}`}
         </div>
       </div>
     </div>
