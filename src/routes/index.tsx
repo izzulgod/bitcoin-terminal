@@ -337,17 +337,16 @@ function DetectScreen({
     { type: "p2pkh", label: "BIP44 · Legacy", example: "1..." },
     { type: "p2tr", label: "BIP86 · Taproot", example: "bc1p..." },
   ];
+  const t = useT();
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-10">
-      <h2 className="text-2xl font-bold">Detected wallet</h2>
+      <h2 className="text-2xl font-bold">{t("detect.title")}</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        {source === "ledger"
-          ? "xpub imported from Ledger."
-          : "Confirm the script type."}
+        {source === "ledger" ? t("detect.subFromLedger") : t("detect.subConfirm")}
       </p>
 
       <div className="mt-6 rounded-xl border border-bitcoin/30 bg-bitcoin/5 p-4">
-        <div className="text-xs uppercase tracking-wider text-muted-foreground">Network</div>
+        <div className="text-xs uppercase tracking-wider text-muted-foreground">{t("detect.network")}</div>
         <div className="mt-1 font-semibold">
           Bitcoin {detected.network === "mainnet" ? "Mainnet" : "Testnet"}
         </div>
@@ -385,13 +384,13 @@ function DetectScreen({
           onClick={onBack}
           className="flex-1 rounded-xl border border-border bg-card py-3.5 font-medium"
         >
-          Back
+          {t("common.back")}
         </button>
         <button
           onClick={onNext}
           className="flex-[2] rounded-xl bg-bitcoin py-3.5 font-semibold text-primary-foreground"
         >
-          Continue
+          {t("common.continue")}
         </button>
       </div>
     </div>
