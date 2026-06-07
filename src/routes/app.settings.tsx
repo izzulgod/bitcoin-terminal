@@ -37,6 +37,7 @@ export const Route = createFileRoute("/app/settings")({
 });
 
 function SettingsScreen() {
+  const t = useT();
   const navigate = useNavigate();
   const { wallets, activeWalletId, settings, updateSettings, removeWallet, setActiveWallet, clearWallet, lock } =
     useAppStore();
@@ -46,6 +47,7 @@ function SettingsScreen() {
   const [manageOpen, setManageOpen] = useState(false);
   const [dangerForId, setDangerForId] = useState<string | null>(null);
   const [dangerConfirmText, setDangerConfirmText] = useState("");
+  
   
 
   function handleRemove(id: string) {
