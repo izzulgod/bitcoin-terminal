@@ -119,9 +119,19 @@ function Analytics() {
       : costBasisIdr * fxFromIdr;
   const avgPrice = acquiredSats > 0 ? costBasisFullDisplay / satsToBtc(acquiredSats) : 0;
 
-  const athDistance = price.data
-    ? ((price.data.usd - ALL_TIME_HIGH_USD) / ALL_TIME_HIGH_USD) * 100
+  // Live ATH from CoinGecko (per active currency for display) — falls back to
+  // a sensible reference until data lands so the UI stays usable.
+  const athDisplay = ath.data
+    ? currency === "USD"
+      ? ath.data.usd
+      : ath.data.idr
     : 0;
+  const athUsd = ath.data?.usd ?? 0;
+  // % distance is currency-invariant (use USD baseline).
+  const athDistance =
+    price.data && athUsd > 0 ? ((price.data.usd - athUsd) / athUsd) * 100 : 0;
+  const athProgress =
+    price.data && athUsd > 0 ? Math.min(100, (price.data.usd / athUsd) * 100) : 0;
 
   // Build accumulation timeline from incoming txs (already sorted ascending).
   const timeline = useMemo(() => {
