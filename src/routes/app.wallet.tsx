@@ -318,7 +318,7 @@ function WalletScreen() {
           ))}
           {sync && sync.utxos.length === 0 && (
             <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              No unspent outputs.
+              {t("wallet.noUtxos")}
             </div>
           )}
         </div>
