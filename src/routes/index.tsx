@@ -240,12 +240,11 @@ function ImportScreen({
 }) {
   const [mode, setMode] = useState<"choose" | "xpub">("choose");
   const hidSupported = isWebHidSupported();
+  const t = useT();
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-10">
-      <h2 className="text-2xl font-bold">Import wallet</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Pilih cara import yang paling nyaman.
-      </p>
+      <h2 className="text-2xl font-bold">{t("import.title")}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">{t("import.subtitle")}</p>
 
       {mode === "choose" && (
         <div className="mt-6 space-y-4">
@@ -257,18 +256,17 @@ function ImportScreen({
             >
               {connecting ? (
                 <>
-                  <Loader2 className="h-5 w-5 animate-spin" /> Waiting for Ledger…
+                  <Loader2 className="h-5 w-5 animate-spin" /> {t("import.waitingLedger")}
                 </>
               ) : (
                 <>
-                  <Usb className="h-5 w-5" /> Connect Ledger
+                  <Usb className="h-5 w-5" /> {t("import.connectLedger")}
                 </>
               )}
             </button>
           ) : (
             <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
-              Your browser does not support Ledger (WebHID). Use manual xpub
-              import, or open in Chrome / Edge / Brave on desktop / Android.
+              {t("import.hidUnsupported")}
             </div>
           )}
 
@@ -278,7 +276,7 @@ function ImportScreen({
             onClick={() => setMode("xpub")}
             className="block w-full text-center text-sm text-muted-foreground underline"
           >
-            Paste xpub manually
+            {t("import.pasteManual")}
           </button>
         </div>
       )}
@@ -295,21 +293,21 @@ function ImportScreen({
           />
           {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
           <div className="mt-4 rounded-xl border border-border bg-card/50 p-3 text-xs text-muted-foreground">
-            Your xpub stays on this device. We only query public block explorers.
+            {t("import.privacyNote")}
           </div>
           <div className="mt-auto flex gap-2 pt-6">
             <button
               onClick={() => setMode("choose")}
               className="flex-1 rounded-xl border border-border bg-card py-4 font-medium"
             >
-              Back
+              {t("common.back")}
             </button>
             <button
               onClick={onSubmit}
               disabled={!value.trim()}
               className="flex-[2] inline-flex items-center justify-center gap-2 rounded-xl bg-bitcoin py-4 font-semibold text-primary-foreground disabled:opacity-40"
             >
-              Detect <ArrowRight className="h-5 w-5" />
+              {t("import.detect")} <ArrowRight className="h-5 w-5" />
             </button>
           </div>
         </>
