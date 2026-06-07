@@ -54,6 +54,14 @@ export function useFearGreed() {
   });
 }
 
+export function useAth() {
+  return useQuery<AthData>({
+    queryKey: ["ath"],
+    queryFn: fetchAth,
+    staleTime: 60 * 60_000,
+  });
+}
+
 export function useFees() {
   return useQuery<RecommendedFees>({
     queryKey: ["fees"],
