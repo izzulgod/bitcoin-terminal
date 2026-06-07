@@ -151,6 +151,9 @@ export async function fetchAth(): Promise<AthData> {
     usd: data.market_data.ath.usd,
     idr: data.market_data.ath.idr,
   };
+}
+
+
 
 export async function fetchFearGreed(): Promise<{ value: number; classification: string }> {
   const res = await fetch("https://api.alternative.me/fng/?limit=1");
