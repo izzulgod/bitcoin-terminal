@@ -6,11 +6,13 @@ import {
   fetchPrice,
   fetchMarketChart,
   fetchFearGreed,
+  fetchAth,
   mempoolApi,
   type RecommendedFees,
   type MempoolInfo,
   type PriceData,
   type MarketChartPoint,
+  type AthData,
 } from "@/lib/mempool";
 
 export function useSync() {
