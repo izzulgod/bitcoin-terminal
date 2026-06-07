@@ -77,22 +77,22 @@ function SettingsScreen() {
   return (
     <div className="px-5 pt-6">
       <header>
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="mt-1 text-xs text-muted-foreground">Manage wallet & preferences</p>
+        <h1 className="text-2xl font-bold">{t("settings.title")}</h1>
+        <p className="mt-1 text-xs text-muted-foreground">{t("settings.subtitle")}</p>
       </header>
 
-      <Section title="Wallets">
+      <Section title={t("settings.section.wallets")}>
         <Row
-          label="Manage Wallets"
-          value={`${wallets.length} stored`}
+          label={t("settings.manageWallets")}
+          value={`${wallets.length} ${t("settings.stored")}`}
           onClick={() => setManageOpen(true)}
           icon={<WalletIcon className="h-4 w-4" />}
         />
       </Section>
 
-      <Section title="Preferences">
+      <Section title={t("settings.section.preferences")}>
         <SelectRow
-          label="Currency"
+          label={t("settings.currency")}
           value={settings.currency}
           onChange={(v) => updateSettings({ currency: v as "USD" | "IDR" })}
           options={[
@@ -101,35 +101,35 @@ function SettingsScreen() {
           ]}
         />
         <SelectRow
-          label="Theme"
+          label={t("settings.theme")}
           value={settings.theme}
           onChange={(v) => updateSettings({ theme: v as "dark" | "light" })}
           options={[
-            { value: "dark", label: "Dark" },
-            { value: "light", label: "Light" },
+            { value: "dark", label: t("settings.themeDark") },
+            { value: "light", label: t("settings.themeLight") },
           ]}
         />
         <SelectRow
-          label="Language"
+          label={t("settings.language")}
           value={settings.language}
           onChange={(v) => updateSettings({ language: v as AppLanguage })}
           options={LANGUAGES.map((l) => ({ value: l.value, label: l.label }))}
         />
         <Row
-          label="PIN lock"
-          value={settings.pinEnabled ? "Enabled" : "Off"}
+          label={t("settings.pinLock")}
+          value={settings.pinEnabled ? t("settings.pinEnabled") : t("settings.pinOff")}
           onClick={() => setPinDialog(true)}
           icon={<KeyRound className="h-4 w-4" />}
         />
       </Section>
 
-      <Section title="Data source">
-        <Row label="Explorer" value="mempool.space" />
-        <Row label="Price feed" value="CoinGecko" />
-        <Row label="Sentiment" value="alternative.me" />
+      <Section title={t("settings.section.dataSource")}>
+        <Row label={t("settings.explorer")} value="mempool.space" />
+        <Row label={t("settings.priceFeed")} value="CoinGecko" />
+        <Row label={t("settings.sentiment")} value="alternative.me" />
       </Section>
 
-      <Section title="About">
+      <Section title={t("settings.section.about")}>
         <a
           href={GITHUB_URL}
           target="_blank"
@@ -140,7 +140,7 @@ function SettingsScreen() {
             <span className="text-muted-foreground">
               <Github className="h-4 w-4" />
             </span>
-            View on GitHub
+            {t("settings.github")}
           </span>
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
             izzulgod/bitcoin-terminal
@@ -148,6 +148,7 @@ function SettingsScreen() {
           </span>
         </a>
       </Section>
+
 
       {pinDialog && (
         <ModalShell title="PIN lock" onClose={() => setPinDialog(false)}>
