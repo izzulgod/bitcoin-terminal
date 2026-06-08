@@ -18,6 +18,7 @@ import {
   accountPath,
 } from "@/lib/ledger";
 import { toast } from "sonner";
+import { hashPin } from "@/lib/pin";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
@@ -92,7 +93,7 @@ function Landing() {
     }
   }
 
-  function handleConfirm() {
+  async function handleConfirm() {
     if (!detected) return;
     const label = walletLabel.trim();
     if (!label) return setError("Wallet name is required");
@@ -106,9 +107,10 @@ function Landing() {
       if (pin !== pinConfirm) return setError("PINs do not match");
     }
     if (!skipPinSetup) {
+      const hashedPin = usePin ? await hashPin(pin) : null;
       updateSettings({
         pinEnabled: usePin,
-        pin: usePin ? pin : null,
+        pin: hashedPin,
       });
     }
     addWallet({
