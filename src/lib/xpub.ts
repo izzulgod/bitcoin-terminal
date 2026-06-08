@@ -20,9 +20,9 @@ export interface DetectedWallet {
 
 const VERSION_BYTES: Record<string, { script: ScriptType; label: string; net: "mainnet" | "testnet" }> = {
   // Mainnet
-  "0488b21e": { script: "p2pkh", label: "BIP44 (Legacy)", net: "mainnet" }, // xpub
-  "049d7cb2": { script: "p2sh-p2wpkh", label: "BIP49 (Nested SegWit)", net: "mainnet" }, // ypub
-  "04b24746": { script: "p2wpkh", label: "BIP84 (Native SegWit)", net: "mainnet" }, // zpub
+  "0488b21e": { script: "p2pkh", label: "BIP44 | Legacy", net: "mainnet" }, // xpub
+  "049d7cb2": { script: "p2sh-p2wpkh", label: "BIP49 | Nested SegWit", net: "mainnet" }, // ypub
+  "04b24746": { script: "p2wpkh", label: "BIP84 | Native SegWit", net: "mainnet" }, // zpub
   // Testnet
   "043587cf": { script: "p2pkh", label: "BIP44 Testnet", net: "testnet" }, // tpub
   "044a5262": { script: "p2sh-p2wpkh", label: "BIP49 Testnet", net: "testnet" }, // upub
