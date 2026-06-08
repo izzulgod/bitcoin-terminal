@@ -129,27 +129,21 @@ export function SendModal({ onClose }: { onClose: () => void }) {
   return (
     <ModalShell title="Send Bitcoin" onClose={onClose}>
       {guarded && (
-        <div className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 p-3">
-          <div className="flex items-center gap-2 text-sm font-semibold text-destructive">
-            <ShieldAlert className="h-4 w-4" />
-            Ledger Not Connected
+        <div className="mb-5 flex items-start gap-3 rounded-xl border border-destructive/25 bg-destructive/5 p-3.5">
+          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+          <div>
+            <div className="text-sm font-semibold text-destructive">
+              Ledger Not Connected
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+              Transactions must be signed by a hardware device. Use the
+              <span className="mx-1 font-semibold text-foreground">Sign with Ledger</span>
+              button below to connect and sign.
+            </p>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Transactions must be signed by a hardware device. Connect your
-            Ledger to proceed.
-          </p>
-          <button
-            onClick={async () => {
-              if (!supported) return toast.error("Browser does not support WebHID");
-              try { await connectLedger(); } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
-            }}
-            disabled={!supported}
-            className="mt-2 w-full rounded-lg bg-bitcoin py-2 text-sm font-semibold text-primary-foreground disabled:opacity-40"
-          >
-            Connect Ledger
-          </button>
         </div>
       )}
+
 
       <div className="space-y-3">
         <div>
