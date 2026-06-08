@@ -159,63 +159,97 @@ function WalletScreen() {
             )}
           </div>
 
-          {/* Premium debit-card composition */}
-          <div
-            className="relative mt-3 overflow-hidden rounded-2xl border border-bitcoin/20 p-5 text-primary-foreground shadow-lg"
-            style={{
-              background:
-                "linear-gradient(135deg, oklch(0.32 0.07 60) 0%, oklch(0.22 0.05 50) 55%, oklch(0.14 0.02 40) 100%)",
-            }}
-          >
-            {/* Decorative glow */}
+          {/* Debit-card composition — adapts to light & dark mode */}
+          <div className="mt-3 rounded-2xl border border-border bg-card shadow-sm dark:border-bitcoin/20 dark:shadow-lg">
             <div
-              aria-hidden
-              className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full"
-              style={{ background: "radial-gradient(circle, oklch(0.78 0.17 60 / 0.35), transparent 70%)" }}
-            />
+              className="relative overflow-hidden rounded-2xl p-5"
+              style={{ aspectRatio: "1.586 / 1" }}
+            >
+              {/* Subtle gradient — soft in light, charcoal+bronze in dark */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-[oklch(0.20_0.01_60)] dark:via-[oklch(0.16_0.012_50)] dark:to-[oklch(0.12_0.015_40)]"
+              />
+              {/* Bronze edge highlight (dark mode) */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 dark:opacity-100"
+                style={{
+                  background:
+                    "linear-gradient(135deg, oklch(0.55 0.12 65 / 0.18) 0%, transparent 35%, transparent 65%, oklch(0.55 0.12 65 / 0.14) 100%)",
+                }}
+              />
+              {/* Soft glow accent */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full"
+                style={{
+                  background:
+                    "radial-gradient(circle, oklch(0.78 0.17 60 / 0.18), transparent 70%)",
+                }}
+              />
 
-            {/* Top row */}
-            <div className="relative flex items-start justify-between gap-3">
-              <div className="rounded-xl bg-white/10 p-2 backdrop-blur-sm">
-                <Bitcoin className="h-5 w-5 text-bitcoin" />
-              </div>
-              <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white/90 backdrop-blur-sm">
-                Native SegWit • BIP84
-              </span>
-            </div>
-
-            {/* Center */}
-            <div className="relative mt-7">
-              <div className="text-[10px] uppercase tracking-[0.18em] text-white/60">
-                {t("wallet.totalBalance")}
-              </div>
-              <div className="mt-1 flex items-baseline gap-2">
-                <span className="font-mono text-3xl font-extrabold tracking-tight text-white">
-                  {formatBtc(sync?.totalBalance ?? 0)}
-                </span>
-                <span className="text-sm font-semibold text-white/70">BTC</span>
-              </div>
-              <div className="mt-1 font-mono text-sm text-white/80">
-                {price.data ? formatFiat(fiatVal, currency) : "—"}
-              </div>
-            </div>
-
-            {/* Lower row — masked xpub + network */}
-            <div className="relative mt-6 flex items-end justify-between gap-2">
-              <div>
-                <div className="text-[9px] uppercase tracking-[0.18em] text-white/50">xpub</div>
-                <div className="font-mono text-[11px] text-white/80">{maskedXpub}</div>
-              </div>
-              <div className="text-right">
-                <div className="text-[9px] uppercase tracking-[0.18em] text-white/50">
-                  {t("wallet.network")}
+              {/* Top row */}
+              <div className="relative flex items-start justify-between gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-bitcoin/10 ring-1 ring-bitcoin/30 dark:bg-white/5 dark:ring-white/10">
+                  <img
+                    src="/btc-logo.png"
+                    alt=""
+                    className="h-6 w-6 object-contain"
+                    onError={(e) => {
+                      // Graceful fallback before the asset is uploaded.
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                      const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                      if (fallback) fallback.style.display = "block";
+                    }}
+                  />
+                  <Bitcoin className="h-5 w-5 text-bitcoin" style={{ display: "none" }} />
                 </div>
-                <div className="text-[11px] font-semibold text-white/90">
-                  {wallet?.network === "mainnet" ? "Mainnet" : "Testnet"}
+                <span className="rounded-full bg-foreground/5 px-3 py-1 text-[10px] font-semibold tracking-wide text-foreground/80 ring-1 ring-foreground/10 backdrop-blur-sm dark:bg-white/10 dark:text-white/90 dark:ring-white/15">
+                  {derivationLabel}
+                </span>
+              </div>
+
+              {/* Center balance */}
+              <div className="relative mt-5">
+                <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground dark:text-white/55">
+                  {t("wallet.totalBalance")}
+                </div>
+                <div className="mt-1 flex items-baseline gap-2">
+                  <span className="font-mono text-2xl font-extrabold tracking-tight text-foreground dark:text-white">
+                    {formatBtc(sync?.totalBalance ?? 0)}
+                  </span>
+                  <span className="text-sm font-semibold text-muted-foreground dark:text-white/70">
+                    BTC
+                  </span>
+                </div>
+                <div className="mt-0.5 font-mono text-xs text-muted-foreground dark:text-white/75">
+                  {price.data ? formatFiat(fiatVal, currency) : "—"}
+                </div>
+              </div>
+
+              {/* Lower row — canonical key + network */}
+              <div className="relative mt-auto flex items-end justify-between gap-2 pt-4">
+                <div className="min-w-0">
+                  <div className="text-[9px] uppercase tracking-[0.18em] text-muted-foreground dark:text-white/45">
+                    {keyPrefix}
+                  </div>
+                  <div className="truncate font-mono text-[11px] text-foreground/80 dark:text-white/75">
+                    {maskedKey}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[9px] uppercase tracking-[0.18em] text-muted-foreground dark:text-white/45">
+                    {t("wallet.network")}
+                  </div>
+                  <div className="text-[11px] font-semibold text-foreground dark:text-white/90">
+                    {wallet?.network === "mainnet" ? "Mainnet" : "Testnet"}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
 
           {/* Send / Receive */}
           <div className="mt-4 grid grid-cols-2 gap-2">
