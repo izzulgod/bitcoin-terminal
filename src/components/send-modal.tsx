@@ -6,12 +6,11 @@ import { useAppStore } from "@/store/app";
 import { useSync, useFees, usePrice } from "@/hooks/use-bitcoin-data";
 import {
   subscribeLedger,
-  connectLedger,
-  isWebHidSupported,
   signPsbtWithLedger,
   broadcastTx,
   type LedgerInfo,
 } from "@/lib/ledger";
+
 import {
   buildPsbt,
   buildAddressPathMap,
