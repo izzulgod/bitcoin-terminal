@@ -80,7 +80,7 @@ export function SendModal({ onClose }: { onClose: () => void }) {
   }, [wallet, sync, recipient, amountSats, feeRate]);
 
   const guarded = !ledger.connected;
-  const supported = isWebHidSupported();
+
 
   async function handleSend() {
     if (!preview || "error" in preview) return;
