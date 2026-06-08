@@ -25,6 +25,7 @@ import { classifyTxs } from "@/lib/sync-engine";
 import { SendModal } from "@/components/send-modal";
 import { ReceiveModal } from "@/components/receive-modal";
 import { useT } from "@/lib/i18n";
+import { encodeForScriptType, canonicalPrefix } from "@/lib/xpub";
 
 export const Route = createFileRoute("/app/wallet")({
   component: WalletScreen,
