@@ -75,10 +75,17 @@ function WalletScreen() {
     toast.success("Wallet renamed");
   }
 
-  // Masked xpub for the debit-card micro-detail row.
-  const maskedXpub = wallet
-    ? `${wallet.normalizedXpub.slice(0, 6)} •••• ${wallet.normalizedXpub.slice(-6)}`
+  // Canonical extended-key encoded for the wallet's actual script type
+  // (xpub → zpub for BIP84, etc.) so the card never shows stale prefixes
+  // after switching wallets or selecting a different BIP.
+  const canonicalKey = wallet
+    ? encodeForScriptType(wallet.normalizedXpub, wallet.scriptType, wallet.network)
+    : "";
+  const keyPrefix = wallet ? canonicalPrefix(wallet.scriptType, wallet.network) : "xpub";
+  const maskedKey = wallet
+    ? `${canonicalKey.slice(0, 8)} •••• ${canonicalKey.slice(-6)}`
     : "—";
+  const derivationLabel = wallet?.derivationLabel ?? "—";
 
   return (
     <div className="px-5 pt-6">
