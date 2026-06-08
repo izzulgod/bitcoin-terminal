@@ -145,7 +145,7 @@ export function SendModal({ onClose }: { onClose: () => void }) {
       )}
 
 
-      <div className="space-y-3">
+      <div className="space-y-5">
         <div>
           <label className="text-[10px] uppercase tracking-wider text-muted-foreground">
             Recipient address
