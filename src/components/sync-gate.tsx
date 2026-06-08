@@ -17,13 +17,32 @@ export function SyncGate({ children }: { children: React.ReactNode }) {
 
 function ScanningScreen() {
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center px-6 text-center">
-      <div className="rounded-3xl bg-bitcoin/10 p-6 bitcoin-glow">
-        <Bitcoin className="h-12 w-12 animate-spin text-bitcoin" />
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-6 text-center">
+      <div className="relative flex h-24 w-24 items-center justify-center">
+        {/* Soft pulse ring */}
+        <div className="absolute inset-0 animate-ping rounded-full bg-bitcoin/15" />
+        <div className="absolute inset-2 rounded-full bg-bitcoin/10" />
+        {/* Transparent logo — falls back to lucide if asset missing */}
+        <img
+          src="/loading-logo.png"
+          alt=""
+          className="relative h-14 w-14 object-contain"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = "none";
+            const fb = e.currentTarget.nextElementSibling as HTMLElement | null;
+            if (fb) fb.style.display = "block";
+          }}
+        />
+        <Bitcoin
+          className="relative h-12 w-12 animate-spin text-bitcoin"
+          style={{ display: "none" }}
+        />
       </div>
-      <h2 className="mt-6 text-lg font-semibold">Scanning blockchain</h2>
-      <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-        Deriving addresses, fetching UTXOs and transaction history from mempool.space…
+      <h2 className="mt-8 text-base font-semibold tracking-tight">
+        Scanning blockchain
+      </h2>
+      <p className="mt-2 max-w-xs text-xs text-muted-foreground">
+        Deriving addresses and fetching balance from mempool.space
       </p>
     </div>
   );

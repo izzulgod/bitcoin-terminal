@@ -20,9 +20,9 @@ export interface DetectedWallet {
 
 const VERSION_BYTES: Record<string, { script: ScriptType; label: string; net: "mainnet" | "testnet" }> = {
   // Mainnet
-  "0488b21e": { script: "p2pkh", label: "BIP44 (Legacy)", net: "mainnet" }, // xpub
-  "049d7cb2": { script: "p2sh-p2wpkh", label: "BIP49 (Nested SegWit)", net: "mainnet" }, // ypub
-  "04b24746": { script: "p2wpkh", label: "BIP84 (Native SegWit)", net: "mainnet" }, // zpub
+  "0488b21e": { script: "p2pkh", label: "BIP44 | Legacy", net: "mainnet" }, // xpub
+  "049d7cb2": { script: "p2sh-p2wpkh", label: "BIP49 | Nested SegWit", net: "mainnet" }, // ypub
+  "04b24746": { script: "p2wpkh", label: "BIP84 | Native SegWit", net: "mainnet" }, // zpub
   // Testnet
   "043587cf": { script: "p2pkh", label: "BIP44 Testnet", net: "testnet" }, // tpub
   "044a5262": { script: "p2sh-p2wpkh", label: "BIP49 Testnet", net: "testnet" }, // upub
@@ -104,11 +104,67 @@ export function detectAndNormalize(rawXpub: string, scriptOverride?: ScriptType)
 
 export function scriptTypeLabel(s: ScriptType): string {
   switch (s) {
-    case "p2wpkh": return "BIP84 (Native SegWit)";
-    case "p2sh-p2wpkh": return "BIP49 (Nested SegWit)";
-    case "p2pkh": return "BIP44 (Legacy)";
-    case "p2tr": return "BIP86 (Taproot)";
+    case "p2wpkh": return "BIP84 | Native SegWit";
+    case "p2sh-p2wpkh": return "BIP49 | Nested SegWit";
+    case "p2pkh": return "BIP44 | Legacy";
+    case "p2tr": return "BIP86 | Taproot";
   }
+}
+
+/**
+ * Canonical SLIP-132 version bytes per (network, scriptType).
+ * Taproot has no SLIP-132 prefix; we keep xpub/tpub for it.
+ */
+const CANONICAL_VERSIONS: Record<"mainnet" | "testnet", Record<ScriptType, string>> = {
+  mainnet: {
+    "p2pkh": "0488b21e",        // xpub
+    "p2sh-p2wpkh": "049d7cb2",  // ypub
+    "p2wpkh": "04b24746",       // zpub
+    "p2tr": "0488b21e",         // xpub
+  },
+  testnet: {
+    "p2pkh": "043587cf",        // tpub
+    "p2sh-p2wpkh": "044a5262",  // upub
+    "p2wpkh": "045f1cf6",       // vpub
+    "p2tr": "043587cf",         // tpub
+  },
+};
+
+/**
+ * Re-encode the bip32-normalized xpub into its canonical SLIP-132 form
+ * for the given script type (e.g. xpub→zpub for BIP84). Display-only.
+ */
+export function encodeForScriptType(
+  normalizedXpub: string,
+  scriptType: ScriptType,
+  network: "mainnet" | "testnet" = "mainnet",
+): string {
+  try {
+    const decoded = bs58check.decode(normalizedXpub);
+    const versionHex = CANONICAL_VERSIONS[network][scriptType];
+    const version = Buffer.from(versionHex, "hex");
+    const payload = new Uint8Array(decoded.length);
+    payload.set(version, 0);
+    payload.set(decoded.slice(4), 4);
+    return bs58check.encode(payload);
+  } catch {
+    return normalizedXpub;
+  }
+}
+
+/** Short prefix label for the canonical extended key (xpub/ypub/zpub/...). */
+export function canonicalPrefix(
+  scriptType: ScriptType,
+  network: "mainnet" | "testnet" = "mainnet",
+): string {
+  if (network === "testnet") {
+    if (scriptType === "p2sh-p2wpkh") return "upub";
+    if (scriptType === "p2wpkh") return "vpub";
+    return "tpub";
+  }
+  if (scriptType === "p2sh-p2wpkh") return "ypub";
+  if (scriptType === "p2wpkh") return "zpub";
+  return "xpub";
 }
 
 function networkFor(net: "mainnet" | "testnet"): bitcoin.networks.Network {

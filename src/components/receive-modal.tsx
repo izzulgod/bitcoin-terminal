@@ -69,15 +69,15 @@ export function ReceiveModal({ onClose }: { onClose: () => void }) {
     <ModalShell title="Receive" onClose={onClose}>
       {guarded ? (
         <div className="space-y-4">
-          <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4">
-            <div className="flex items-center gap-2 font-semibold text-destructive">
-              <ShieldAlert className="h-4 w-4" />
-              Ledger Not Connected
+          <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 p-3.5">
+            <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+            <div>
+              <div className="text-sm font-semibold">Ledger Not Connected</div>
+              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                Connect your Ledger to verify this address directly on the
+                device screen before sharing it.
+              </p>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Connect your Ledger to verify the address directly on the device
-              screen before using it.
-            </p>
           </div>
           <button
             onClick={async () => {
@@ -95,16 +95,13 @@ export function ReceiveModal({ onClose }: { onClose: () => void }) {
           </button>
           <button
             onClick={() => setBypass(true)}
-            className="w-full rounded-xl border border-destructive/40 bg-destructive/5 py-3 text-sm font-semibold text-destructive"
+            className="w-full rounded-xl border border-border bg-card py-3 text-sm font-semibold text-muted-foreground hover:text-foreground"
           >
             Continue without Ledger
           </button>
-          <p className="text-[11px] text-destructive">
-            ⚠ Less secure: address cannot be verified directly on device hardware.
-          </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="mx-auto flex h-64 w-64 items-center justify-center rounded-2xl bg-white p-3">
             {qrUrl ? (
               <img src={qrUrl} alt="Receive address QR" className="h-full w-full" />
@@ -112,11 +109,13 @@ export function ReceiveModal({ onClose }: { onClose: () => void }) {
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             )}
           </div>
-          <div className="rounded-xl border border-border bg-card p-3">
+          <div className="rounded-xl border border-border bg-card p-4">
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
               Next unused address
             </div>
-            <div className="mt-1 break-all font-mono text-xs">{address ?? "—"}</div>
+            <div className="mt-2 break-all font-mono text-[11px] leading-relaxed text-foreground">
+              {address ?? "—"}
+            </div>
             <button
               onClick={() => {
                 if (address) {
@@ -124,9 +123,9 @@ export function ReceiveModal({ onClose }: { onClose: () => void }) {
                   toast.success("Address copied");
                 }
               }}
-              className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1 text-xs"
+              className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold hover:bg-muted"
             >
-              <Copy className="h-3 w-3" /> Copy
+              <Copy className="h-3.5 w-3.5" /> Copy address
             </button>
           </div>
           {ledger.connected ? (
@@ -148,8 +147,8 @@ export function ReceiveModal({ onClose }: { onClose: () => void }) {
               )}
             </button>
           ) : (
-            <p className="text-center text-[11px] text-destructive">
-              This address has not been verified on your device — use with caution.
+            <p className="text-center text-[11px] text-muted-foreground">
+              Tip: connect your Ledger to verify this address on-device.
             </p>
           )}
         </div>
@@ -157,6 +156,7 @@ export function ReceiveModal({ onClose }: { onClose: () => void }) {
     </ModalShell>
   );
 }
+
 
 export function ModalShell({
   title,
