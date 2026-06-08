@@ -368,21 +368,24 @@ function WalletScreen() {
 
       {tab === "Derivation" && wallet && (
         <div className="mt-4 space-y-3">
-          <Field label="xpub" value={wallet.rawXpub} mono />
+          <Field label={keyPrefix} value={canonicalKey} mono />
           <Field label="Script type" value={wallet.scriptType} />
           <Field label="Derivation" value={wallet.derivationLabel} />
           <Field label="Network" value={wallet.network} />
+          <Field label="Source" value={wallet.source === "ledger" ? "Ledger hardware" : "Manual xpub"} />
+          <Field label="Account path" value={wallet.accountPath ?? "—"} mono />
           <Field label="Gap limit" value="20" />
           <details className="rounded-xl border border-border bg-card p-3">
             <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold">
-              Normalized xpub
+              Raw input (as entered)
               <ChevronDown className="h-4 w-4" />
             </summary>
             <div className="mt-2 break-all font-mono text-[10px] text-muted-foreground">
-              {wallet.normalizedXpub}
+              {wallet.rawXpub}
             </div>
           </details>
         </div>
+
       )}
 
       {showSend && <SendModal onClose={() => setShowSend(false)} />}
